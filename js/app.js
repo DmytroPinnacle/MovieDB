@@ -23,8 +23,16 @@ function init() {
 
 function seedInitialData() {
   // Convert simple arrays into movie objects using createMovie
-  SEED_MOVIES.forEach(([title, year, genre, rating, imdbId]) => {
-    const movie = createMovie({ title, year, genre, rating, posterUrl:'', notes:'', imdbId: imdbId || '' });
+  SEED_MOVIES.forEach(([title, year, genre, rating, imdbId, posterUrl]) => {
+    const movie = createMovie({ 
+      title, 
+      year, 
+      genre, 
+      rating, 
+      posterUrl: posterUrl || '', 
+      notes: '', 
+      imdbId: imdbId || '' 
+    });
     addMovie(movie);
   });
   console.info(`Seeded ${SEED_MOVIES.length} movies.`);

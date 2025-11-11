@@ -18,7 +18,7 @@ function formatDate(timestamp) {
 function renderMovieDetail(movie) {
   const container = document.getElementById('movieDetail');
   
-  const posterHtml = movie.posterUrl 
+  const posterHtml = movie.posterUrl && movie.posterUrl.trim()
     ? `<img src="${movie.posterUrl}" alt="Poster for ${movie.title}" />`
     : 'No Poster';
   

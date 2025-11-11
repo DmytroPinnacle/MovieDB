@@ -42,7 +42,7 @@ export function renderMovieList({ filterText='', genre='', sort='title-asc' }) {
     const node = tpl.content.firstElementChild.cloneNode(true);
     node.dataset.id = m.id;
     const poster = node.querySelector('.poster');
-    if (m.posterUrl) {
+    if (m.posterUrl && m.posterUrl.trim()) {
       poster.src = m.posterUrl;
       poster.alt = `Poster for ${m.title}`;
     } else {

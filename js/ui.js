@@ -50,7 +50,10 @@ export function renderMovieList({ filterText='', genre='', sort='title-asc' }) {
       const wrap = node.querySelector('.poster-wrapper');
       wrap.textContent = 'No Poster';
     }
-    node.querySelector('.title').textContent = m.title;
+    const titleLink = node.querySelector('.title-link');
+    titleLink.textContent = m.title;
+    titleLink.href = `detail.html?id=${encodeURIComponent(m.id)}`;
+    
     node.querySelector('.meta').textContent = `${m.genre} • ${m.year}${m.rating!=null ? ' • ⭐ ' + m.rating : ''}`;
     node.querySelector('.notes').textContent = m.notes || '';
     

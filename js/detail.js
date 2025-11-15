@@ -1,5 +1,7 @@
 // Movie detail page logic
 import { loadMovies } from './storage.js';
+import { loadWatchers, getWatcherById } from './watcher-storage.js';
+import { getWatcherFullName } from './watcher-models.js';
 
 function getMovieIdFromURL() {
   const params = new URLSearchParams(window.location.search);
@@ -26,6 +28,12 @@ function renderMovieDetail(movie) {
     ? `<div class="detail-meta-item"><span class="detail-rating">⭐ ${movie.rating}</span></div>`
     : '';
   
+  const watcherIds = movie.watcherIds || [];
+  const watcherNames = watcherIds
+    .map(id => getWatcherById(id))
+    .filter(Boolean)
+    .map(w => escapeHtml(getWatcherFullName(w)));
+  
   const imdbHtml = movie.imdbId && movie.imdbId.trim()
     ? `<a href="https://www.imdb.com/title/${movie.imdbId}/" target="_blank" rel="noopener" class="small">View on IMDB</a>`
     : '';
@@ -34,6 +42,15 @@ function renderMovieDetail(movie) {
     ? `<div class="detail-section">
          <h3>Personal Notes</h3>
          <div class="detail-notes">${escapeHtml(movie.notes)}</div>
+       </div>`
+    : '';
+  
+  const watchersHtml = watcherNames.length > 0
+    ? `<div class="detail-section watchers-section-detail">
+         <h3>Watchers</h3>
+         <div class="watchers-tags">
+           ${watcherNames.map(name => `<span class="watcher-tag">👤 ${name}</span>`).join('')}
+         </div>
        </div>`
     : '';
   
@@ -89,6 +106,8 @@ function renderMovieDetail(movie) {
     </div>
     
     ${notesHtml}
+    
+    ${watchersHtml}
   `;
 }
 
@@ -104,6 +123,7 @@ function showNotFound() {
 }
 
 function init() {
+  loadWatchers(); // Load watchers data
   const movieId = getMovieIdFromURL();
   
   if (!movieId) {

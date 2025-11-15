@@ -11,6 +11,7 @@
  *    posterUrl?: string,
  *    notes?: string,
  *    imdbId?: string (format: tt1234567),
+ *    watcherIds?: string[] (array of watcher ids),
  *    createdAt: number (epoch ms),
  *    updatedAt: number (epoch ms)
  *  }
@@ -18,6 +19,13 @@
 
 export function createMovie(data) {
   const now = Date.now();
+  // Handle watcherIds - could be array from FormData.getAll() or comma-separated string
+  let watcherIds = [];
+  if (data.watcherIds) {
+    watcherIds = Array.isArray(data.watcherIds) 
+      ? data.watcherIds.filter(id => id && id.trim())
+      : data.watcherIds.split(',').map(id => id.trim()).filter(Boolean);
+  }
   return {
     id: crypto.randomUUID ? crypto.randomUUID() : 'm_' + Math.random().toString(36).slice(2, 11),
     title: data.title.trim(),
@@ -27,6 +35,7 @@ export function createMovie(data) {
     posterUrl: (data.posterUrl || '').trim(),
     notes: (data.notes || '').trim(),
     imdbId: (data.imdbId || '').trim(),
+    watcherIds: watcherIds,
     createdAt: now,
     updatedAt: now
   };
@@ -58,6 +67,13 @@ export function validateMovieFields(fields) {
 }
 
 export function updateMovie(original, updates) {
+  // Handle watcherIds - could be array from FormData.getAll() or comma-separated string
+  let watcherIds = [];
+  if (updates.watcherIds) {
+    watcherIds = Array.isArray(updates.watcherIds) 
+      ? updates.watcherIds.filter(id => id && id.trim())
+      : updates.watcherIds.split(',').map(id => id.trim()).filter(Boolean);
+  }
   return {
     ...original,
     title: updates.title.trim(),
@@ -67,6 +83,7 @@ export function updateMovie(original, updates) {
     posterUrl: (updates.posterUrl || '').trim(),
     notes: (updates.notes || '').trim(),
     imdbId: (updates.imdbId || '').trim(),
+    watcherIds: watcherIds,
     updatedAt: Date.now()
   };
 }

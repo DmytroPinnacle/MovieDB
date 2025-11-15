@@ -141,6 +141,28 @@
   color: var(--text);
 }
 
+/* Watchers section at bottom of detail page */
+.watchers-section-detail {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #334155;
+}
+
+.watchers-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.watchers-tags .watcher-tag {
+  display: inline-block;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  background: #334155;
+  border-radius: var(--radius);
+  color: var(--text);
+}
+
 .not-found {
   text-align: center;
   padding: 4rem 2rem;

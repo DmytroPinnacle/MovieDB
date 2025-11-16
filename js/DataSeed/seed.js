@@ -404,7 +404,7 @@ export const SEED_MOVIES = [
     "Western",
     8.5,
     "tt0064116",
-    "https://m.media-amazon.com/images/M/MV5BODQ3NDExOGYtMzI3Mi00NWRlLTkwNjAtNjc4MDgzZGJiZTA1XkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg",
+    null,
   ],
   [
     "Casablanca",

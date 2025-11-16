@@ -3,8 +3,8 @@ import { createMovie, validateMovieFields, updateMovie as mergeMovie } from './m
 import { loadMovies, addMovie, updateMovieInStore, deleteMovie, getMovies } from './storage.js';
 import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatchers } from './watcher-storage.js';
 import { createWatcher, validateWatcherFields, updateWatcher as mergeWatcher, getWatcherFullName } from './watcher-models.js';
-import { SEED_MOVIES } from './seed.js';
-import { SEED_WATCHERS } from './watcher-seed.js';
+import { SEED_MOVIES } from './DataSeed/seed.js';
+import { SEED_WATCHERS } from './DataSeed/watcher-seed.js';
 import { 
   renderMovieList, populateGenreFilter, populateWatcherCheckboxes,
   fillForm, resetForm, showErrors, 

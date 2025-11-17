@@ -6,8 +6,7 @@ import { createWatcher, validateWatcherFields, updateWatcher as mergeWatcher, ge
 import { SEED_MOVIES } from './DataSeed/seed.js';
 import { SEED_WATCHERS } from './DataSeed/watcher-seed.js';
 import { 
-  renderMovieList, populateGenreFilter, populateWatcherCheckboxes,
-  fillForm, resetForm, showErrors, 
+  renderMovieList, populateGenreFilter, populateWatcherCheckboxes, resetForm, showErrors, 
   renderWatcherList, fillWatcherForm, resetWatcherForm, showWatcherModal, hideWatcherModal,
   qs 
 } from './ui.js';
@@ -89,10 +88,7 @@ function wireEvents() {
     const item = e.target.closest('.movie-item');
     if (!item) return;
     const id = item.dataset.id;
-    if (e.target.matches('.edit-btn')) {
-      const movie = getMovies().find(m => m.id === id);
-      if (movie) fillForm(movie);
-    } else if (e.target.matches('.delete-btn')) {
+    if (e.target.matches('.delete-btn')) {
       if (confirm('Delete this movie?')) {
         deleteMovie(id);
         renderMovieList(viewState);

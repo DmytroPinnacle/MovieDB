@@ -27,7 +27,7 @@
   </header>
   <main class="layout">
     <section class="panel" aria-labelledby="formTitle">
-      <h2 id="formTitle">Add / Edit Movie</h2>
+      <h2 id="formTitle">Add Movie</h2>
       <form id="movieForm" novalidate>
         <!-- Hidden field needs a name attribute to be included in FormData for edits -->
         <input type="hidden" id="movieId" name="movieId" />
@@ -109,10 +109,8 @@
       <div class="info">
         <h3 class="title"><a class="title-link" href="#"></a></h3>
         <p class="meta"></p>
-        <p class="notes"></p>
         <p class="watchers-section"></p>
         <div class="item-actions">
-          <button class="small edit-btn" aria-label="Edit movie">Edit</button>
           <button class="small danger delete-btn" aria-label="Delete movie">Delete</button>
           <a class="small imdb-link hidden" target="_blank" rel="noopener" aria-label="View on IMDB">IMDB</a>
         </div>

@@ -64,7 +64,6 @@ export function renderMovieList({ filterText='', genre='', sort='title-asc' }) {
       .map(w => w.firstName);
     
     node.querySelector('.meta').textContent = `${m.genre} • ${m.year}${m.rating!=null ? ' • ⭐ ' + m.rating : ''}`;
-    node.querySelector('.notes').textContent = m.notes || '';
     
     // Add watchers as small text below notes
     const watchersSection = node.querySelector('.watchers-section');
@@ -122,29 +121,13 @@ export function populateWatcherCheckboxes(selectedIds = []) {
   }).join('');
 }
 
-export function fillForm(movie) {
-  qs('#movieId').value = movie.id;
-  qs('#title').value = movie.title;
-  qs('#year').value = movie.year;
-  qs('#genre').value = movie.genre;
-  qs('#rating').value = movie.rating == null ? '' : movie.rating;
-  qs('#posterUrl').value = movie.posterUrl || '';
-  qs('#imdbId').value = movie.imdbId || '';
-  populateWatcherCheckboxes(movie.watcherIds || []);
-  qs('#notes').value = movie.notes || '';
-  qs('#cancelEditBtn').classList.remove('hidden');
-  qs('#formTitle').textContent = 'Edit Movie';
-  qs('#saveBtn').textContent = 'Update';
-  qs('#title').focus();
-}
-
 export function resetForm() {
   const form = qs('#movieForm');
   form.reset();
   qs('#movieId').value='';
   populateWatcherCheckboxes([]);
   qs('#cancelEditBtn').classList.add('hidden');
-  qs('#formTitle').textContent = 'Add / Edit Movie';
+  qs('#formTitle').textContent = 'Add Movie';
   qs('#saveBtn').textContent = 'Save';
 }
 

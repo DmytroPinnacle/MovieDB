@@ -65,7 +65,7 @@ a.small.secondary:hover {
 
 form { display:flex; flex-direction:column; gap:.85rem; }
 .field { display:flex; flex-direction:column; gap:.35rem; }
-.field label { font-weight:600; font-size:.85rem; letter-spacing:.5px; }
+.field label, .field .field-label { font-weight:600; font-size:.85rem; letter-spacing:.5px; display:block; margin-bottom:.3rem; }
 .field input, .field textarea { background:#0f172a; border:1px solid #334155; padding:.55rem .7rem; border-radius:var(--radius); color:var(--text); resize:vertical; }
 .help { color: var(--muted); font-size:.7rem; }
 .error { color: var(--danger); font-size:.65rem; min-height: .9rem; }

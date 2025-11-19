@@ -3,6 +3,7 @@ import { createMovie, validateMovieFields, updateMovie as mergeMovie } from './m
 import { loadMovies, addMovie, updateMovieInStore, deleteMovie, getMovies } from './storage.js';
 import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatchers } from './watcher-storage.js';
 import { createWatcher, validateWatcherFields, updateWatcher as mergeWatcher, getWatcherFullName } from './watcher-models.js';
+import { loadSessions, deleteSessionsByMovieId } from './session-storage.js';
 import { SEED_MOVIES } from './DataSeed/seed.js';
 import { SEED_WATCHERS } from './DataSeed/watcher-seed.js';
 import { 
@@ -23,6 +24,7 @@ function init() {
   if (!watchers.length) {
     seedInitialWatchers();
   }
+  loadSessions(); // Load sessions data
   const movies = loadMovies();
   if (!movies.length) {
     seedInitialData();
@@ -89,8 +91,9 @@ function wireEvents() {
     if (!item) return;
     const id = item.dataset.id;
     if (e.target.matches('.delete-btn')) {
-      if (confirm('Delete this movie?')) {
+      if (confirm('Delete this movie? This will also delete all watching sessions for this movie.')) {
         deleteMovie(id);
+        deleteSessionsByMovieId(id); // Delete associated sessions
         renderMovieList(viewState);
         populateGenreFilter();
         qs('#addMovieBtn').focus();

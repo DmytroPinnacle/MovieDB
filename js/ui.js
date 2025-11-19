@@ -2,6 +2,7 @@
 import { getMovies } from './storage.js';
 import { getWatchers, getWatcherById } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
+import { getLatestSessionByMovieId } from './session-storage.js';
 
 export function qs(sel, parent=document){ return parent.querySelector(sel); }
 export function qsa(sel, parent=document){ return Array.from(parent.querySelectorAll(sel)); }
@@ -56,8 +57,9 @@ export function renderMovieList({ filterText='', genre='', sort='title-asc' }) {
     titleLink.textContent = m.title;
     titleLink.href = `detail.html?id=${encodeURIComponent(m.id)}`;
     
-    // Get watcher first names only
-    const watcherIds = m.watcherIds || [];
+    // Get latest session watchers (if any), otherwise use movie watchers
+    const latestSession = getLatestSessionByMovieId(m.id);
+    const watcherIds = latestSession ? latestSession.watcherIds : (m.watcherIds || []);
     const watcherFirstNames = watcherIds
       .map(id => getWatcherById(id))
       .filter(Boolean)

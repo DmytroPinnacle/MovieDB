@@ -375,6 +375,150 @@
   font-style: italic;
 }
 
+/* Watching Sessions section */
+.sessions-section-detail {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #334155;
+}
+
+.sessions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sessions-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.session-item {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.session-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.session-date {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.session-watchers {
+  color: var(--muted);
+  font-size: 0.85rem;
+  flex: 1;
+}
+
+.session-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.session-notes {
+  background: #1e293b;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 0.75rem;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  border-left: 3px solid var(--primary);
+}
+
+.no-sessions-msg {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  padding: 1rem;
+  text-align: center;
+  background: #0f172a;
+  border: 1px dashed #334155;
+  border-radius: var(--radius);
+}
+
+.session-form-container {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #0f172a;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+}
+
+.session-form-container.hidden {
+  display: none;
+}
+
+.session-form .field {
+  margin-bottom: 1rem;
+}
+
+.session-form label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.session-form input[type="date"],
+.session-form textarea {
+  width: 100%;
+  background: #1e293b;
+  border: 1px solid #334155;
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.session-form input[type="date"]:focus,
+.session-form textarea:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  border-color: var(--primary);
+}
+
+.session-form .watcher-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: var(--radius);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.session-form .actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 .not-found {
   text-align: center;
   padding: 4rem 2rem;

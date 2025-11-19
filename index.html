@@ -74,9 +74,9 @@
           <small class="help">Format: tt followed by 7-8 digits (e.g., tt0111161)</small>
         </div>
         <div class="field">
-          <label for="watcherIds">Watchers</label>
+          <span id="watchersLabel" class="field-label">Watchers</span>
           <div class="watcher-controls">
-            <div id="watcherCheckboxes" class="watcher-checkboxes">
+            <div id="watcherCheckboxes" class="watcher-checkboxes" role="group" aria-labelledby="watchersLabel">
               <!-- Populated by JavaScript -->
             </div>
             <button type="button" id="manageWatchersBtn" class="small secondary">Manage Watchers</button>

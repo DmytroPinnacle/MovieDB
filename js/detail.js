@@ -123,13 +123,12 @@ function renderSessionsSection(movieId) {
           .filter(Boolean)
           .map(w => getWatcherFullName(w));
         
-        // Format date from timestamp (date only, no time)
+        // Format date from timestamp as yyyy-mm-dd
         const sessionDate = new Date(session.watchedDate);
-        const formattedDate = sessionDate.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        });
+        const year = sessionDate.getFullYear();
+        const month = String(sessionDate.getMonth() + 1).padStart(2, '0');
+        const day = String(sessionDate.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
         
         return `
           <div class="session-item" data-session-id="${session.id}">
@@ -195,6 +194,10 @@ function showSessionForm(movieId, session = null) {
   const notesInput = document.getElementById('sessionNotes');
   
   container.classList.remove('hidden');
+  
+  // Block manual keyboard input and paste; allow calendar picker interaction
+  dateInput.onkeydown = (e) => e.preventDefault();
+  dateInput.onpaste = (e) => e.preventDefault();
   
   if (session) {
     // Edit mode

@@ -30,7 +30,6 @@ function init() {
     seedInitialData();
   }
   populateGenreFilter();
-  populateWatcherCheckboxes([]);
   renderMovieList(viewState);
   wireEvents();
 }
@@ -102,11 +101,6 @@ function wireEvents() {
   });
 
   // Watcher modal events
-  qs('#manageWatchersBtn').addEventListener('click', () => {
-    renderWatcherList();
-    showWatcherModal();
-  });
-
   qs('.modal-close').addEventListener('click', hideWatcherModal);
   
   qs('#watcherModal').addEventListener('click', (e) => {
@@ -147,7 +141,6 @@ function wireEvents() {
       }
       deleteWatcher(id);
       renderWatcherList();
-      populateWatcherCheckboxes([]);
       renderMovieList(viewState);
     }
   });
@@ -158,8 +151,6 @@ function onSubmitForm(e) {
   const form = e.target;
   const formData = new FormData(form);
   const fields = Object.fromEntries(formData.entries());
-  // Get all selected watcher IDs from checkboxes
-  fields.watcherIds = formData.getAll('watcherIds');
   
   const errors = validateMovieFields(fields);
   showErrors(errors);
@@ -203,12 +194,6 @@ function onSubmitWatcherForm(e) {
   }
   resetWatcherForm();
   renderWatcherList();
-  
-  // Preserve currently selected watchers when refreshing checkboxes
-  const currentlySelected = Array.from(document.querySelectorAll('#watcherCheckboxes input:checked'))
-    .map(cb => cb.value);
-  populateWatcherCheckboxes(currentlySelected);
-  
   renderMovieList(viewState); // Refresh in case watcher names are shown
   qs('#watcherFirstName').focus();
 }

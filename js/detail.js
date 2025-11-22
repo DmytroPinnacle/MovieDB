@@ -30,28 +30,9 @@ function renderMovieDetail(movie) {
     ? `<div class="detail-meta-item"><span class="detail-rating">⭐ ${movie.rating}</span></div>`
     : '';
   
-  const watcherIds = movie.watcherIds || [];
-  const watcherNames = watcherIds
-    .map(id => getWatcherById(id))
-    .filter(Boolean)
-    .map(w => escapeHtml(getWatcherFullName(w)));
-  
   const imdbHtml = movie.imdbId && movie.imdbId.trim()
     ? `<a href="https://www.imdb.com/title/${movie.imdbId}/" target="_blank" rel="noopener" class="small">View on IMDB</a>`
     : '';
-  
-  const watchersHtml = `
-    <div class="detail-section watchers-section-detail">
-      <div class="watchers-inner editable" data-field="watchers">
-        <h3>Watchers <button class="edit-field-btn" aria-label="Edit watchers">✏️</button></h3>
-        <div class="watchers-display">
-          ${watcherNames.length > 0 
-            ? watcherNames.map(name => `<span class="watcher-tag">👤 ${name}</span>`).join('') 
-            : '<span class="no-watchers-msg">No watchers assigned</span>'}
-        </div>
-      </div>
-    </div>
-  `;
   
   const notesHtml = `
     <div class="detail-section notes-section-detail">
@@ -125,8 +106,6 @@ function renderMovieDetail(movie) {
         <span class="detail-field-value">${formatDate(movie.updatedAt)}</span>
       </div>
     </div>
-    
-    ${watchersHtml}
     
     ${renderSessionsSection(movie.id)}
     

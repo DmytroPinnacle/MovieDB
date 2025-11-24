@@ -81,8 +81,6 @@ function wireEvents() {
 
   form.addEventListener('submit', onSubmitForm);
   form.addEventListener('reset', () => setTimeout(()=> showErrors({}), 0));
-  qs('#cancelEditBtn').addEventListener('click', () => { resetForm(); showErrors({}); });
-  qs('#addMovieBtn').addEventListener('click', () => { resetForm(); qs('#title').focus(); });
 
   // Event delegation for list actions
   list.addEventListener('click', (e) => {
@@ -95,7 +93,6 @@ function wireEvents() {
         deleteSessionsByMovieId(id); // Delete associated sessions
         renderMovieList(viewState);
         populateGenreFilter();
-        qs('#addMovieBtn').focus();
       }
     }
   });
@@ -156,17 +153,8 @@ function onSubmitForm(e) {
   showErrors(errors);
   if (Object.keys(errors).length) return;
 
-  const id = fields.movieId;
-  const isEdit = !!id;
-  if (isEdit) {
-    const existing = getMovies().find(m => m.id === id);
-    if (!existing) return;
-    const updated = mergeMovie(existing, fields);
-    updateMovieInStore(id, updated);
-  } else {
-    const movie = createMovie(fields);
-    addMovie(movie);
-  }
+  const movie = createMovie(fields);
+  addMovie(movie);
   resetForm();
   populateGenreFilter();
   renderMovieList(viewState);

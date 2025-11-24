@@ -22,15 +22,12 @@
         <option value="rating-desc">Rating ↓</option>
         <option value="rating-asc">Rating ↑</option>
       </select>
-      <button id="addMovieBtn" class="primary">Add Movie</button>
     </div>
   </header>
   <main class="layout">
     <section class="panel" aria-labelledby="formTitle">
       <h2 id="formTitle">Add Movie</h2>
       <form id="movieForm" novalidate>
-        <!-- Hidden field needs a name attribute to be included in FormData for edits -->
-        <input type="hidden" id="movieId" name="movieId" />
         <div class="field">
           <label for="title">Title</label>
           <input id="title" name="title" required maxlength="120" />
@@ -81,7 +78,6 @@
         <div class="actions">
           <button type="submit" class="primary" id="saveBtn">Save</button>
           <button type="reset" id="resetBtn">Reset</button>
-          <button type="button" id="cancelEditBtn" class="secondary hidden">Cancel Edit</button>
         </div>
       </form>
     </section>

@@ -47,7 +47,12 @@ a.small.imdb-link {
   background:#f59e0b; 
   color:white;
 }
-a.small:hover { background:#d97706; }
+a.small.imdb-link:hover { background:#d97706; }
+a.small.kinopoisk-link, a.small.kinopoisk-btn {
+  background:#ff6600;
+  color:white;
+}
+a.small.kinopoisk-link:hover, a.small.kinopoisk-btn:hover { background:#e55a00; }
 a.small.secondary {
   background: #475569;
   color: white;

@@ -34,6 +34,10 @@ function renderMovieDetail(movie) {
     ? `<a href="https://www.imdb.com/title/${movie.imdbId}/" target="_blank" rel="noopener" class="small">View on IMDB</a>`
     : '';
   
+  const kinopoiskHtml = movie.kinopoiskId && movie.kinopoiskId.trim()
+    ? `<a href="https://www.kinopoisk.ru/film/${movie.kinopoiskId}/" target="_blank" rel="noopener" class="small kinopoisk-btn">View on Kinopoisk</a>`
+    : '';
+  
   const notesHtml = `
     <div class="detail-section notes-section-detail">
       <div class="notes-inner editable" data-field="notes">
@@ -67,6 +71,7 @@ function renderMovieDetail(movie) {
         </div>
         <div class="detail-actions">
           ${imdbHtml}
+          ${kinopoiskHtml}
         </div>
       </div>
     </div>
@@ -98,6 +103,13 @@ function renderMovieDetail(movie) {
         <span class="detail-field-label">IMDB ID:</span>
         <span class="detail-field-value">${movie.imdbId ? escapeHtml(movie.imdbId) : 'Not set'}</span>
         <button class="edit-field-btn" aria-label="Edit IMDB ID">✏️</button>
+      </div>
+      ` : ''}
+      ${movie.kinopoiskId || true ? `
+      <div class="detail-field editable" data-field="kinopoiskId">
+        <span class="detail-field-label">Kinopoisk ID:</span>
+        <span class="detail-field-value">${movie.kinopoiskId ? escapeHtml(movie.kinopoiskId) : 'Not set'}</span>
+        <button class="edit-field-btn" aria-label="Edit Kinopoisk ID">✏️</button>
       </div>
       ` : ''}
       <div class="detail-field editable" data-field="posterUrl">
@@ -685,6 +697,13 @@ function enterEditMode(fieldContainer, fieldName, movie, valueSpan) {
       const imdbPattern = /^tt\d{7,8}$/;
       if (!imdbPattern.test(newValue)) {
         alert('IMDB ID must be in format: tt1234567 (tt followed by 7-8 digits)');
+        return;
+      }
+    }
+    if (fieldName === 'kinopoiskId' && newValue !== '') {
+      const kinopoiskPattern = /^\d+$/;
+      if (!kinopoiskPattern.test(newValue)) {
+        alert('Kinopoisk ID must be numeric (e.g., 326)');
         return;
       }
     }

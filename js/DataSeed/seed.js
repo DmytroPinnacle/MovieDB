@@ -2,7 +2,7 @@
 // Poster URLs from IMDB CDN - these are publicly accessible thumbnails
 // Ratings here are approximate public consensus (0-10 scale) for demonstration only.
 // Genres simplified to a primary category.
-// Format: [title, year, genre, rating, imdbId, posterUrl]
+// Format: [title, year, genre, rating, imdbId, posterUrl, kinopoiskId]
 export const SEED_MOVIES = [
   [
     "The Godfather",
@@ -11,6 +11,7 @@ export const SEED_MOVIES = [
     9.2,
     "tt0068646",
     "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "325",
   ],
   [
     "The Godfather: Part II",
@@ -75,6 +76,7 @@ export const SEED_MOVIES = [
     8.8,
     "tt0109830",
     "https://m.media-amazon.com/images/M/MV5BNWIwODRlZTUtY2U3ZS00Yzg1LWJhNzYtMmZiYmEyNmU1NjMzXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
+    "448",
   ],
   [
     "The Matrix",

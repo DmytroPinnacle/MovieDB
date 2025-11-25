@@ -11,6 +11,7 @@
  *    posterUrl?: string,
  *    notes?: string,
  *    imdbId?: string (format: tt1234567),
+ *    kinopoiskId?: string (numeric ID),
  *    watcherIds?: string[] (array of watcher ids),
  *    createdAt: number (epoch ms),
  *    updatedAt: number (epoch ms)
@@ -35,6 +36,7 @@ export function createMovie(data) {
     posterUrl: (data.posterUrl || '').trim(),
     notes: (data.notes || '').trim(),
     imdbId: (data.imdbId || '').trim(),
+    kinopoiskId: (data.kinopoiskId || '').trim(),
     watcherIds: watcherIds,
     createdAt: now,
     updatedAt: now
@@ -62,6 +64,12 @@ export function validateMovieFields(fields) {
       errors.imdbId = 'Format: tt1234567 (tt + 7-8 digits)';
     }
   }
+  if (fields.kinopoiskId && fields.kinopoiskId.trim()) {
+    const kinopoiskPattern = /^\d+$/;
+    if (!kinopoiskPattern.test(fields.kinopoiskId.trim())) {
+      errors.kinopoiskId = 'Must be numeric (e.g., 326)';
+    }
+  }
   if (fields.notes && fields.notes.length > 500) errors.notes = 'Max 500 chars';
   return errors;
 }
@@ -83,6 +91,7 @@ export function updateMovie(original, updates) {
     posterUrl: (updates.posterUrl || '').trim(),
     notes: (updates.notes || '').trim(),
     imdbId: (updates.imdbId || '').trim(),
+    kinopoiskId: (updates.kinopoiskId || '').trim(),
     watcherIds: watcherIds,
     updatedAt: Date.now()
   };

@@ -85,6 +85,15 @@ export function renderMovieList({ filterText='', genre='', sort='title-asc' }) {
       imdbLink.classList.add('hidden');
     }
     
+    // Handle Kinopoisk link
+    const kinopoiskLink = node.querySelector('.kinopoisk-link');
+    if (m.kinopoiskId && m.kinopoiskId.trim()) {
+      kinopoiskLink.href = `https://www.kinopoisk.ru/film/${m.kinopoiskId}/`;
+      kinopoiskLink.classList.remove('hidden');
+    } else {
+      kinopoiskLink.classList.add('hidden');
+    }
+    
     frag.appendChild(node);
   });
   listEl.appendChild(frag);

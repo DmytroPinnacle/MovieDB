@@ -71,6 +71,12 @@
           <small class="error" data-error-for="imdbId"></small>
         </div>
         <div class="field">
+          <label for="kinopoiskId">Kinopoisk ID</label>
+          <input id="kinopoiskId" name="kinopoiskId" placeholder="326" pattern="\d+" />
+          <small class="help">Numeric ID only (e.g., 326 for The Matrix)</small>
+          <small class="error" data-error-for="kinopoiskId"></small>
+        </div>
+        <div class="field">
           <label for="notes">Notes</label>
           <textarea id="notes" name="notes" rows="3" maxlength="500"></textarea>
           <small class="help">Short personal notes (max 500 chars)</small>
@@ -98,6 +104,7 @@
         <p class="watchers-section"></p>
         <div class="actions">
           <a class="small imdb-link hidden" target="_blank" rel="noopener" aria-label="View on IMDB">IMDB</a>
+          <a class="small kinopoisk-link hidden" target="_blank" rel="noopener" aria-label="View on Kinopoisk">Kinopoisk</a>
         </div>
       </div>
     </li>

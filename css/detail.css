@@ -63,12 +63,96 @@
   min-width: 280px;
 }
 
+.detail-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
 .detail-title {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   font-size: 2rem;
   letter-spacing: 0.5px;
   line-height: 1.2;
+  flex: 1;
 }
+
+.detail-settings {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.settings-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  color: var(--muted);
+  transition: all 0.2s ease;
+  border-radius: var(--radius);
+  line-height: 1;
+}
+
+.settings-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+.settings-btn:active {
+  transform: scale(0.95);
+}
+
+.settings-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  background: var(--panel);
+  border: 1px solid #475569;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  min-width: 120px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.settings-menu.hidden {
+  display: none;
+}
+
+.settings-menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.settings-menu-item:last-child {
+  border-bottom: none;
+}
+
+.settings-menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.settings-menu-item.delete-movie-btn {
+  color: #ef4444;
+}
+
+.settings-menu-item.delete-movie-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
 
 .detail-meta {
   display: flex;

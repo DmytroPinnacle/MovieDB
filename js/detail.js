@@ -1,5 +1,5 @@
 // Movie detail page logic
-import { loadMovies } from './storage.js';
+import { loadMovies, deleteMovie } from './storage.js';
 import { loadWatchers, getWatcherById, getWatchers } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
 import { loadSessions, getSessionsByMovieId, addSession, updateSessionInStore, deleteSession } from './session-storage.js';
@@ -51,7 +51,15 @@ function renderMovieDetail(movie) {
     <div class="detail-header">
       <div class="detail-poster">${posterHtml}</div>
       <div class="detail-info">
-        <h1 class="detail-title">${escapeHtml(movie.title)}</h1>
+        <div class="detail-info-header">
+          <h1 class="detail-title">${escapeHtml(movie.title)}</h1>
+          <div class="detail-settings">
+            <button class="settings-btn" aria-label="Movie settings" aria-haspopup="true">⋮</button>
+            <div class="settings-menu hidden">
+              <button class="settings-menu-item delete-movie-btn">Delete</button>
+            </div>
+          </div>
+        </div>
         <div class="detail-meta">
           <div class="detail-meta-item">📅 ${movie.year}</div>
           <div class="detail-meta-item">🎭 ${escapeHtml(movie.genre)}</div>
@@ -317,6 +325,22 @@ function showNotFound() {
   document.getElementById('notFound').classList.remove('hidden');
 }
 
+function handleDeleteMovie(movie) {
+  const confirmMsg = `Are you sure you want to delete "${movie.title}"?\n\nThis action cannot be undone.`;
+  
+  if (confirm(confirmMsg)) {
+    // Delete all sessions associated with this movie
+    const sessions = getSessionsByMovieId(movie.id);
+    sessions.forEach(session => deleteSession(session.id));
+    
+    // Delete the movie
+    deleteMovie(movie.id);
+    
+    // Redirect to main page
+    window.location.href = 'index.html';
+  }
+}
+
 function init() {
   loadWatchers(); // Load watchers data
   loadSessions(); // Load sessions data
@@ -350,6 +374,19 @@ function setupInlineEditing(movie) {
   container.parentNode.replaceChild(newContainer, container);
   
   newContainer.addEventListener('click', (e) => {
+    // Settings menu toggle
+    if (e.target.matches('.settings-btn')) {
+      const menu = e.target.nextElementSibling;
+      menu.classList.toggle('hidden');
+      e.stopPropagation();
+    }
+    
+    // Delete movie action
+    if (e.target.matches('.delete-movie-btn')) {
+      handleDeleteMovie(movie);
+      return;
+    }
+    
     if (e.target.matches('.edit-field-btn')) {
       const fieldContainer = e.target.closest('.detail-field, .watchers-inner, .notes-inner');
       const fieldName = fieldContainer.dataset.field;
@@ -392,6 +429,16 @@ function setupInlineEditing(movie) {
     
     if (e.target.matches('.cancel-session-btn')) {
       hideSessionForm();
+    }
+  });
+  
+  // Close settings menu when clicking outside
+  document.addEventListener('click', (e) => {
+    const menu = newContainer.querySelector('.settings-menu');
+    if (menu && !menu.classList.contains('hidden')) {
+      if (!e.target.closest('.detail-settings')) {
+        menu.classList.add('hidden');
+      }
     }
   });
   

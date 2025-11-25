@@ -4,7 +4,7 @@
  */
 
 import { createWatcher, validateWatcherFields, updateWatcher, getWatcherFullName } from './watcher-models.js';
-import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatchers } from './watcher-storage.js';
+import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatchers, toggleFavorite, isFavorite, getFavorites } from './watcher-storage.js';
 
 // ===== STATE MANAGEMENT =====
 let currentEditId = null;
@@ -122,10 +122,30 @@ function renderWatchers() {
   watcherList.classList.remove('hidden');
   emptyMessage.classList.add('hidden');
   
-  // Sort alphabetically by full name
-  const sorted = filtered.sort((a, b) => 
+  // Sort: favorites first (in selection order), then alphabetically by name
+  const favorites = [];
+  const nonFavorites = [];
+  
+  filtered.forEach(watcher => {
+    if (isFavorite(watcher.id)) {
+      favorites.push(watcher);
+    } else {
+      nonFavorites.push(watcher);
+    }
+  });
+  
+  // Sort non-favorites alphabetically
+  nonFavorites.sort((a, b) => 
     getWatcherFullName(a).localeCompare(getWatcherFullName(b))
   );
+  
+  // Favorites maintain their selection order (from storage)
+  const favoriteIds = getFavorites();
+  favorites.sort((a, b) => {
+    return favoriteIds.indexOf(a.id) - favoriteIds.indexOf(b.id);
+  });
+  
+  const sorted = [...favorites, ...nonFavorites];
   
   // Render list items
   watcherList.innerHTML = sorted.map(watcher => createWatcherItem(watcher)).join('');
@@ -139,6 +159,7 @@ function createWatcherItem(watcher) {
   const createdDate = new Date(watcher.createdAt).toLocaleDateString();
   const wasUpdated = watcher.updatedAt !== watcher.createdAt;
   const updatedDate = wasUpdated ? new Date(watcher.updatedAt).toLocaleDateString() : null;
+  const isFav = isFavorite(watcher.id);
   
   return `
     <li class="watcher-item" data-id="${watcher.id}">
@@ -150,6 +171,9 @@ function createWatcherItem(watcher) {
         </p>
       </div>
       <div class="watcher-actions">
+        <button class="small ${isFav ? 'primary' : 'secondary'} favorite-btn" data-id="${watcher.id}" aria-label="${isFav ? 'Remove from' : 'Add to'} favorites" title="${isFav ? 'Remove from' : 'Add to'} favorites">
+          ${isFav ? '⭐' : '☆'}
+        </button>
         <button class="small secondary edit-btn" data-id="${watcher.id}" aria-label="Edit ${escapeHtml(fullName)}">
           ✏️ Edit
         </button>
@@ -162,6 +186,11 @@ function createWatcherItem(watcher) {
 }
 
 function attachListItemListeners() {
+  // Favorite buttons
+  document.querySelectorAll('.favorite-btn').forEach(btn => {
+    btn.addEventListener('click', handleToggleFavorite);
+  });
+  
   // Edit buttons
   document.querySelectorAll('.edit-btn').forEach(btn => {
     btn.addEventListener('click', handleEdit);
@@ -206,6 +235,12 @@ function handleEdit(e) {
   if (window.innerWidth <= 900) {
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+}
+
+function handleToggleFavorite(e) {
+  const watcherId = e.currentTarget.dataset.id;
+  toggleFavorite(watcherId);
+  renderWatchers();
 }
 
 function handleDelete(e) {

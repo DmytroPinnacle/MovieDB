@@ -1,5 +1,5 @@
 // Searchable dropdown component for watcher selection
-import { getWatchers } from './watcher-storage.js';
+import { getWatchers, getWatchersSortedByFavorites, isFavorite } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
 
 /**
@@ -31,11 +31,8 @@ export class WatcherDropdown {
   }
   
   render() {
-    const watchers = getWatchers().sort((a, b) => {
-      const nameA = getWatcherFullName(a).toLowerCase();
-      const nameB = getWatcherFullName(b).toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
+    // Get watchers sorted by favorites first, then alphabetically
+    const watchers = getWatchersSortedByFavorites();
     
     // Build selected watchers display
     const selectedWatchers = this.selectedWatcherIds
@@ -82,6 +79,7 @@ export class WatcherDropdown {
     
     return watchers.map(w => {
       const isSelected = this.selectedWatcherIds.includes(w.id);
+      const isFav = isFavorite(w.id);
       const fullName = getWatcherFullName(w);
       return `
         <label class="watcher-dropdown-item">
@@ -92,7 +90,7 @@ export class WatcherDropdown {
             ${isSelected ? 'checked' : ''}
             data-watcher-name="${this.escapeHtml(fullName.toLowerCase())}"
           />
-          <span>${this.escapeHtml(fullName)}</span>
+          <span>${isFav ? '⭐ ' : ''}${this.escapeHtml(fullName)}</span>
         </label>
       `;
     }).join('');

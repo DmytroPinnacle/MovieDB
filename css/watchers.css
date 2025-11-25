@@ -109,6 +109,17 @@
   align-items: center;
 }
 
+.favorite-btn {
+  font-size: 1rem;
+  padding: 0.4rem 0.6rem;
+  min-width: 2.2rem;
+  transition: transform 0.2s;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.1);
+}
+
 .empty-message {
   text-align: center;
   color: var(--muted);

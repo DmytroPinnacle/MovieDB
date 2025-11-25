@@ -9,20 +9,10 @@
 <body>
   <header class="app-header">
     <h1>🎬 MovieDB</h1>
-    <div class="toolbar">
-      <input id="searchInput" type="search" placeholder="Search by title..." aria-label="Search movies by title" />
-      <select id="filterGenre" aria-label="Filter by genre">
-        <option value="">All Genres</option>
-      </select>
-      <select id="sortSelect" aria-label="Sort movies">
-        <option value="title-asc">Title A→Z</option>
-        <option value="title-desc">Title Z→A</option>
-        <option value="year-desc">Year ↓</option>
-        <option value="year-asc">Year ↑</option>
-        <option value="rating-desc">Rating ↓</option>
-        <option value="rating-asc">Rating ↑</option>
-      </select>
-    </div>
+    <nav class="header-nav">
+      <a href="index.html" class="nav-link active">🎬 Movies</a>
+      <a href="watchers.html" class="nav-link">👥 Watchers</a>
+    </nav>
   </header>
   <main class="layout">
     <section class="panel" aria-labelledby="formTitle">
@@ -89,6 +79,20 @@
     </section>
     <section class="panel" aria-labelledby="listTitle">
       <h2 id="listTitle">Movies</h2>
+      <div class="movie-controls">
+        <input id="searchInput" type="search" placeholder="Search by title..." aria-label="Search movies by title" />
+        <select id="filterGenre" aria-label="Filter by genre">
+          <option value="">All Genres</option>
+        </select>
+        <select id="sortSelect" aria-label="Sort movies">
+          <option value="title-asc">Title A→Z</option>
+          <option value="title-desc">Title Z→A</option>
+          <option value="year-desc">Year ↓</option>
+          <option value="year-asc">Year ↑</option>
+          <option value="rating-desc">Rating ↓</option>
+          <option value="rating-asc">Rating ↑</option>
+        </select>
+      </div>
       <ul id="movieList" class="movie-list" aria-live="polite"></ul>
       <p id="emptyState" class="empty">No movies yet. Add your first!</p>
     </section>

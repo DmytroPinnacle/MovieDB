@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watchers - MovieDB</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/watchers.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>👥 Watchers</h1>
+    <nav class="header-nav">
+      <a href="index.html" class="nav-link">🎬 Movies</a>
+      <a href="watchers.html" class="nav-link active">👥 Watchers</a>
+    </nav>
+  </header>
+  
+  <main class="layout">
+    <!-- Left panel: Form for adding/editing watchers -->
+    <section class="panel" aria-labelledby="formTitle">
+      <h2 id="formTitle">Add Watcher</h2>
+      <form id="watcherForm" novalidate>
+        <input type="hidden" id="editingId" />
+        
+        <div class="field">
+          <label for="firstName">First Name</label>
+          <input 
+            id="firstName" 
+            name="firstName" 
+            required 
+            maxlength="50" 
+            placeholder="Enter first name"
+            autocomplete="given-name"
+          />
+          <small class="error" data-error-for="firstName"></small>
+        </div>
+        
+        <div class="field">
+          <label for="lastName">Last Name</label>
+          <input 
+            id="lastName" 
+            name="lastName" 
+            maxlength="50" 
+            placeholder="Enter last name (optional)"
+            autocomplete="family-name"
+          />
+          <small class="error" data-error-for="lastName"></small>
+          <small class="help">Optional field</small>
+        </div>
+        
+        <div class="actions">
+          <button type="submit" class="primary" id="submitBtn">Add Watcher</button>
+          <button type="button" class="secondary hidden" id="cancelBtn">Cancel</button>
+        </div>
+      </form>
+    </section>
+    
+    <!-- Right panel: List of watchers -->
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Watcher List</h2>
+        <div class="list-info">
+          <span id="watcherCount">0 watchers</span>
+        </div>
+      </div>
+      
+      <div class="search-box">
+        <input 
+          id="searchInput" 
+          type="search" 
+          placeholder="Search watchers by name..." 
+          aria-label="Search watchers"
+        />
+      </div>
+      
+      <div id="watcherListContainer">
+        <ul id="watcherList" class="watcher-list"></ul>
+        <p id="emptyMessage" class="empty-message hidden">No watchers found. Add your first watcher!</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="js/watchers-app.js"></script>
+</body>
+</html>

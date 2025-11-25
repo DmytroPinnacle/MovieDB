@@ -1,0 +1,147 @@
+/* Watchers Page Specific Styles */
+
+.header-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.nav-link {
+  padding: 0.5rem 1rem;
+  background: #334155;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.nav-link:hover {
+  background: #475569;
+}
+
+.nav-link.active {
+  background: var(--primary);
+  color: white;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.panel-header h2 {
+  margin: 0;
+}
+
+.list-info {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.search-box {
+  margin-bottom: 1rem;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: var(--radius);
+  color: var(--text);
+}
+
+.search-box input:focus {
+  outline: var(--focus);
+}
+
+/* Watcher List Styles */
+.watcher-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.watcher-item {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: border-color 0.2s, transform 0.1s;
+}
+
+.watcher-item:hover {
+  border-color: #475569;
+}
+
+.watcher-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.watcher-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.watcher-meta {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.watcher-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.empty-message {
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem 1rem;
+  font-size: 0.95rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .watcher-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .watcher-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .header-nav {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+}
+
+/* Highlight animation for newly added/updated items */
+@keyframes highlight {
+  0% { background: #1e40af; }
+  100% { background: #0f172a; }
+}
+
+.watcher-item.highlight {
+  animation: highlight 1s ease-out;
+}

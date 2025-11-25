@@ -6,6 +6,7 @@ A minimal client-side movie collection app using only **HTML**, **CSS**, and **v
 - Add movies with title, year, genre, rating, poster URL, notes, and assigned watcher
 - Manage watchers (first name + optional last name) separately
 - Assign movies to specific watchers to track who wants to watch or has watched
+- **Searchable dropdown for watcher selection** with partial matching
 - Edit and delete existing movies and watchers
 - Client-side search (title) + genre filter + sort (title, year, rating)
 - Detail page for each movie with full information
@@ -20,10 +21,12 @@ A minimal client-side movie collection app using only **HTML**, **CSS**, and **v
 ```
 index.html          # Main page + template + watcher modal
 detail.html         # Individual movie detail page
-css/styles.css      # Main styling (layout, components, utilities, modal)
+dropdown-demo.html  # Demo page for searchable dropdown component
+css/styles.css      # Main styling (layout, components, utilities, modal, dropdown)
 css/detail.css      # Detail page specific styles
 js/models.js        # Movie data model + validation helpers
 js/watcher-models.js # Watcher data model + validation helpers
+js/watcher-dropdown.js # Reusable searchable dropdown component
 js/storage.js       # Movie localStorage CRUD abstraction + cache
 js/watcher-storage.js # Watcher localStorage CRUD abstraction + cache
 js/ui.js            # Rendering & DOM utilities (movies + watchers)

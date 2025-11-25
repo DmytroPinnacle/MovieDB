@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watcher Dropdown Demo</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body {
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .demo-section {
+      background: var(--panel);
+      padding: 2rem;
+      border-radius: var(--radius);
+      margin-bottom: 2rem;
+    }
+    .demo-output {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Searchable Watcher Dropdown Demo</h1>
+  
+  <div class="demo-section">
+    <h2>Dropdown Component</h2>
+    <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem;">
+      Try searching for watchers by typing part of their name. You can select multiple watchers.
+    </p>
+    
+    <div class="field">
+      <label>Select Watchers</label>
+      <div id="demoDropdown"></div>
+    </div>
+    
+    <div class="demo-output">
+      <strong>Selected IDs:</strong> <span id="selectedOutput">None</span>
+    </div>
+  </div>
+  
+  <div class="demo-section">
+    <h2>Technical Features</h2>
+    <ul style="color: var(--muted); line-height: 1.8;">
+      <li>✅ Partial string matching (case-insensitive)</li>
+      <li>✅ Multi-select with visual tags</li>
+      <li>✅ Click outside to close</li>
+      <li>✅ Search filters in real-time</li>
+      <li>✅ Event delegation pattern</li>
+      <li>✅ Component-based architecture</li>
+      <li>✅ XSS protection via HTML escaping</li>
+    </ul>
+  </div>
+  
+  <script type="module">
+    import { loadWatchers } from './js/watcher-storage.js';
+    import { WatcherDropdown } from './js/watcher-dropdown.js';
+    import { SEED_WATCHERS } from './js/DataSeed/watcher-seed.js';
+    import { createWatcher } from './js/watcher-models.js';
+    import { addWatcher } from './js/watcher-storage.js';
+    
+    // Seed some demo watchers if none exist
+    const watchers = loadWatchers();
+    if (watchers.length === 0) {
+      SEED_WATCHERS.forEach(([firstName, lastName]) => {
+        const watcher = createWatcher({ firstName, lastName: lastName || '' });
+        addWatcher(watcher);
+      });
+      console.log('Seeded demo watchers');
+    }
+    
+    // Initialize dropdown
+    const dropdown = new WatcherDropdown('demoDropdown', {
+      selectedIds: [],
+      placeholder: 'Search and select watchers...',
+      onChange: (selectedIds) => {
+        document.getElementById('selectedOutput').textContent = 
+          selectedIds.length > 0 ? JSON.stringify(selectedIds, null, 2) : 'None';
+      }
+    });
+    
+    console.log('Demo loaded! Dropdown instance:', dropdown);
+  </script>
+</body>
+</html>

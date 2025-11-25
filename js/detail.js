@@ -4,6 +4,9 @@ import { loadWatchers, getWatcherById, getWatchers } from './watcher-storage.js'
 import { getWatcherFullName } from './watcher-models.js';
 import { loadSessions, getSessionsByMovieId, addSession, updateSessionInStore, deleteSession } from './session-storage.js';
 import { createSession, validateSessionFields, updateSession, dateStringToTimestamp } from './session-models.js';
+import { WatcherDropdown } from './watcher-dropdown.js';
+
+let sessionWatcherDropdown = null;
 
 function getMovieIdFromURL() {
   const params = new URLSearchParams(window.location.search);
@@ -184,10 +187,8 @@ function renderSessionsSection(movieId) {
             <small class="error" data-error-for="watchedDate"></small>
           </div>
           <div class="field">
-            <span id="sessionWatchersLabel" class="field-label">Watchers</span>
-            <div id="sessionWatcherCheckboxes" class="watcher-checkboxes" role="group" aria-labelledby="sessionWatchersLabel">
-              <!-- Populated by JS -->
-            </div>
+            <span class="field-label">Watchers</span>
+            <div id="sessionWatcherDropdown"></div>
             <small class="error" data-error-for="watcherIds"></small>
           </div>
           <div class="field">
@@ -229,14 +230,26 @@ function showSessionForm(movieId, session = null) {
     const day = String(sessionDate.getDate()).padStart(2, '0');
     dateInput.value = `${year}-${month}-${day}`;
     notesInput.value = session.notes || '';
-    populateSessionWatcherCheckboxes(session.watcherIds || []);
+    
+    // Initialize dropdown with selected watchers
+    sessionWatcherDropdown = new WatcherDropdown('sessionWatcherDropdown', {
+      selectedIds: session.watcherIds || [],
+      placeholder: 'Select watchers...'
+    });
+    
     container.querySelector('.save-session-btn').textContent = 'Update Session';
   } else {
     // Add mode
     form.reset();
     sessionIdInput.value = '';
     dateInput.value = new Date().toISOString().split('T')[0];
-    populateSessionWatcherCheckboxes([]);
+    
+    // Initialize dropdown with no selection
+    sessionWatcherDropdown = new WatcherDropdown('sessionWatcherDropdown', {
+      selectedIds: [],
+      placeholder: 'Select watchers...'
+    });
+    
     container.querySelector('.save-session-btn').textContent = 'Save Session';
   }
   
@@ -249,30 +262,7 @@ function hideSessionForm() {
   const container = document.querySelector('.session-form-container');
   container.classList.add('hidden');
   clearSessionFormErrors();
-}
-
-function populateSessionWatcherCheckboxes(selectedIds = []) {
-  const container = document.getElementById('sessionWatcherCheckboxes');
-  const watchers = getWatchers().sort((a, b) => {
-    const nameA = getWatcherFullName(a).toLowerCase();
-    const nameB = getWatcherFullName(b).toLowerCase();
-    return nameA.localeCompare(nameB);
-  });
-  
-  if (watchers.length === 0) {
-    container.innerHTML = '<span class="no-watchers">No watchers available</span>';
-    return;
-  }
-  
-  container.innerHTML = watchers.map(w => {
-    const checked = selectedIds.includes(w.id) ? 'checked' : '';
-    return `
-      <label class="watcher-checkbox-label">
-        <input type="checkbox" name="sessionWatcherIds" value="${w.id}" ${checked} />
-        <span>${escapeHtml(getWatcherFullName(w))}</span>
-      </label>
-    `;
-  }).join('');
+  sessionWatcherDropdown = null;
 }
 
 function handleSessionSubmit(movie) {
@@ -286,7 +276,7 @@ function handleSessionSubmit(movie) {
   const fields = {
     movieId: movie.id,
     watchedDate: watchedDate,
-    watcherIds: formData.getAll('sessionWatcherIds'),
+    watcherIds: sessionWatcherDropdown ? sessionWatcherDropdown.getSelectedIds() : [],
     notes: formData.get('notes') || ''
   };
   

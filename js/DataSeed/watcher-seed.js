@@ -6,4 +6,7 @@ export const SEED_WATCHERS = [
   ["Watcher", "2"],
   ["Watcher", "3"],
   ["Watcher", "4"],
+  ["Watcher", "5"],
+  ["Watcher", "6"],
+  ["Watcher", "7"],
 ];

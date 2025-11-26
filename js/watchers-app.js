@@ -163,13 +163,13 @@ function createWatcherItem(watcher) {
   
   return `
     <li class="watcher-item" data-id="${watcher.id}">
-      <div class="watcher-info">
+      <a href="watcher-detail.html?id=${watcher.id}" class="watcher-info watcher-link">
         <h3 class="watcher-name">${escapeHtml(fullName)}</h3>
         <p class="watcher-meta">
           Added: ${createdDate}
           ${wasUpdated ? `• Updated: ${updatedDate}` : ''}
         </p>
-      </div>
+      </a>
       <div class="watcher-actions">
         <button class="small ${isFav ? 'primary' : 'secondary'} favorite-btn" data-id="${watcher.id}" aria-label="${isFav ? 'Remove from' : 'Add to'} favorites" title="${isFav ? 'Remove from' : 'Add to'} favorites">
           ${isFav ? '⭐' : '☆'}

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watcher Details - MovieDB</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/watchers.css" />
+  <link rel="stylesheet" href="css/watcher-detail.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>👤 Watcher Profile</h1>
+    <nav class="header-nav">
+      <a href="index.html" class="nav-link">🎬 Movies</a>
+      <a href="watchers.html" class="nav-link">👥 Watchers</a>
+    </nav>
+  </header>
+  
+  <main class="detail-layout">
+    <!-- Watcher Info Section -->
+    <section class="watcher-profile panel">
+      <div class="profile-header">
+        <div class="avatar">
+          <span id="avatarInitials">?</span>
+        </div>
+        <div class="profile-info">
+          <h2 id="watcherName">Loading...</h2>
+          <p class="profile-meta">
+            <span id="sessionCount">0 sessions</span>
+            <span class="separator">•</span>
+            <span id="movieCount">0 movies</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Session History Section -->
+    <section class="sessions-section panel">
+      <div class="panel-header">
+        <h2>Watching History</h2>
+        <div class="session-stats">
+          <span id="filteredCount">0 sessions</span>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <div class="filter-group">
+          <label>Watched Date</label>
+          <button type="button" id="watchedDateRangeBtn" class="range-selector-btn">2025</button>
+        </div>
+        
+        <div class="filter-group">
+          <label>Release Year</label>
+          <button type="button" id="releaseYearRangeBtn" class="range-selector-btn">All</button>
+        </div>
+
+        <div class="filter-group">
+          <label for="sortOrder">Sort</label>
+          <select id="sortOrder">
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select>
+        </div>
+
+        <button id="clearFilters" class="secondary small">Clear Filters</button>
+      </div>
+
+      <!-- Watched Date Range Selector Popup -->
+      <div id="watchedDateRangePopup" class="range-popup hidden">
+        <div class="range-popup-content">
+          <div class="range-header">
+            <h3>Select Watched Date Range</h3>
+            <button class="range-close" aria-label="Close">&times;</button>
+          </div>
+          <div class="range-values">
+            <span id="watchedDateRangeDisplay">2025</span>
+          </div>
+          
+          <h4 style="margin: 1rem 0 0.5rem 0; font-size: 0.9rem; color: var(--muted);">Year Range</h4>
+          <div class="range-slider-container">
+            <div class="range-track"></div>
+            <div class="range-progress" id="yearRangeProgress"></div>
+            <div class="range-labels" id="yearRangeLabels"></div>
+            <input type="range" id="yearRangeStart" class="range-slider" min="2020" max="2025" value="2025">
+            <input type="range" id="yearRangeEnd" class="range-slider" min="2020" max="2025" value="2025">
+          </div>
+          
+          <h4 style="margin: 1rem 0 0.5rem 0; font-size: 0.9rem; color: var(--muted);">Month Range</h4>
+          <div class="range-slider-container">
+            <div class="range-track"></div>
+            <div class="range-progress" id="monthRangeProgress"></div>
+            <div class="range-labels" id="monthRangeLabels"></div>
+            <input type="range" id="monthRangeStart" class="range-slider" min="0" max="11" value="0">
+            <input type="range" id="monthRangeEnd" class="range-slider" min="0" max="11" value="11">
+          </div>
+          
+          <div class="range-actions">
+            <button class="secondary small" id="watchedDateRangeReset">Reset</button>
+            <button class="primary small" id="watchedDateRangeApply">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Movie Year Range Selector Popup -->
+      <div id="movieYearRangePopup" class="range-popup hidden">
+        <div class="range-popup-content">
+          <div class="range-header">
+            <h3>Select Movie Release Year Range</h3>
+            <button class="range-close" aria-label="Close">&times;</button>
+          </div>
+          <div class="range-values">
+            <span id="movieYearRangeDisplay">All Years</span>
+          </div>
+          <div class="range-slider-container">
+            <div class="range-track"></div>
+            <div class="range-progress" id="movieYearRangeProgress"></div>
+            <div class="range-labels" id="movieYearRangeLabels"></div>
+            <input type="range" id="movieYearRangeStart" class="range-slider" min="1990" max="2025" value="1990">
+            <input type="range" id="movieYearRangeEnd" class="range-slider" min="1990" max="2025" value="2025">
+          </div>
+          <div class="range-actions">
+            <button class="secondary small" id="movieYearRangeReset">Reset</button>
+            <button class="primary small" id="movieYearRangeApply">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sessions List -->
+      <div id="sessionsList" class="sessions-list">
+        <p class="empty-message">No sessions found.</p>
+      </div>
+    </section>
+
+    <!-- Watched Movies Carousel -->
+    <section class="carousel-section panel">
+      <h2>Watched Movies</h2>
+      <div class="carousel-container">
+        <button id="carouselPrev" class="carousel-btn prev" aria-label="Previous">‹</button>
+        <div class="carousel-track-container">
+          <div id="carouselTrack" class="carousel-track">
+            <!-- Movie posters will be inserted here -->
+          </div>
+        </div>
+        <button id="carouselNext" class="carousel-btn next" aria-label="Next">›</button>
+      </div>
+      <p id="carouselEmpty" class="empty-message hidden">No movies watched yet.</p>
+    </section>
+  </main>
+
+  <script type="module" src="js/watcher-detail-app.js"></script>
+</body>
+</html>

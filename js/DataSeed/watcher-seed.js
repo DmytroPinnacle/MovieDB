@@ -2,11 +2,11 @@
 // Format: [firstName, lastName]
 
 export const SEED_WATCHERS = [
-  ["Watcher", "1"],
-  ["Watcher", "2"],
-  ["Watcher", "3"],
-  ["Watcher", "4"],
-  ["Watcher", "5"],
-  ["Watcher", "6"],
-  ["Watcher", "7"],
+  ["John", "Doe"],
+  ["Benjamin", "Franklin"],
+  ["Abraham", "Lincoln"],
+  ["Theodore", "Roosevelt"],
+  ["Mahatma", "Gandhi"],
+  ["John", "Watson"],
+  ["Sherlock", "Holmes"],
 ];

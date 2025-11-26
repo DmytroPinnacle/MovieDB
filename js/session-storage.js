@@ -1,8 +1,18 @@
 // Watching session storage layer
-import { dateStringToTimestamp } from './session-models.js';
 
 const STORAGE_KEY = 'moviedb.sessions.v1';
 let sessionsCache = null;
+
+/**
+ * Convert a date string (YYYY-MM-DD) to a timestamp (milliseconds since epoch).
+ * JavaScript's Date constructor uses ZERO-BASED months (0 = January, 11 = December)
+ * but ISO date strings (YYYY-MM-DD) use ONE-BASED months (01 = January, 12 = December).
+ */
+function dateStringToTimestamp(dateString) {
+  const [year, month, day] = dateString.split('-').map(Number);
+  // Create date at local midnight, adjusting month from 1-based to 0-based
+  return new Date(year, month - 1, day).getTime();
+}
 
 export function loadSessions() {
   if (sessionsCache) return sessionsCache;
@@ -80,4 +90,26 @@ export function deleteSessionsByMovieId(movieId) {
   const sessions = loadSessions();
   const filtered = sessions.filter(s => s.movieId !== movieId);
   saveSessions(filtered);
+  sessionsCache = null; // Invalidate cache
+}
+
+export function getSessionsByWatcherId(watcherId) {
+  console.log('getSessionsByWatcherId called with:', watcherId);
+  const sessions = loadSessions();
+  console.log('Total sessions in storage:', sessions.length);
+  const filtered = sessions.filter(s => {
+    const hasWatcherIds = s.watcherIds && Array.isArray(s.watcherIds);
+    const includesWatcher = hasWatcherIds && s.watcherIds.includes(watcherId);
+    console.log('Session:', s.id, 'watcherIds:', s.watcherIds, 'includes watcher:', includesWatcher);
+    return includesWatcher;
+  });
+  console.log('Filtered sessions:', filtered.length);
+  return filtered.sort((a, b) => b.watchedDate - a.watchedDate); // Most recent first
+}
+
+export function getWatchedMovieIdsByWatcherId(watcherId) {
+  const sessions = getSessionsByWatcherId(watcherId);
+  const movieIds = new Set();
+  sessions.forEach(s => movieIds.add(s.movieId));
+  return Array.from(movieIds);
 }

@@ -90,6 +90,18 @@
   gap: 0.25rem;
 }
 
+.watcher-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.watcher-link:hover .watcher-name {
+  color: var(--primary);
+}
+
 .watcher-name {
   font-size: 1rem;
   font-weight: 600;

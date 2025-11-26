@@ -61,7 +61,17 @@ export function getWatchers() {
 }
 
 export function getWatcherById(id) {
-  return cache.find(w => w.id === id);
+  console.log('getWatcherById called with id:', id);
+  loadWatchers(); // Ensure watchers are loaded
+  console.log('Cache loaded:', loaded);
+  console.log('Cache contents:', cache);
+  console.log('Cache length:', cache.length);
+  const found = cache.find(w => {
+    console.log('Comparing:', w.id, '===', id, '?', w.id === id);
+    return w.id === id;
+  });
+  console.log('Found watcher:', found);
+  return found;
 }
 
 export function clearAllWatchers() {

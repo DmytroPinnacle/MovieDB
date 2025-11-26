@@ -142,9 +142,17 @@ function renderSessionsSection(movieId) {
   const sessionsListHtml = sessions.length > 0
     ? sessions.map(session => {
         const watcherNames = (session.watcherIds || [])
-          .map(id => getWatcherById(id))
-          .filter(Boolean)
-          .map(w => getWatcherFullName(w));
+          .map(id => {
+            const watcher = getWatcherById(id);
+            if (!watcher) return null;
+            const firstName = watcher.firstName;
+            const rating = session.watcherRatings && session.watcherRatings[id];
+            if (rating !== undefined && rating !== null) {
+              return `${firstName} (⭐${rating})`;
+            }
+            return firstName;
+          })
+          .filter(Boolean);
         
         // Format date from timestamp as yyyy-mm-dd
         const sessionDate = new Date(session.watchedDate);
@@ -186,10 +194,15 @@ function renderSessionsSection(movieId) {
             <input type="date" id="sessionDate" name="watchedDate" required />
             <small class="error" data-error-for="watchedDate"></small>
           </div>
-          <div class="field">
+          <div class="field watchers-section">
             <span class="field-label">Watchers</span>
-            <div id="sessionWatcherDropdown"></div>
-            <small class="error" data-error-for="watcherIds"></small>
+            <div class="watchers-subsection">
+              <div id="sessionWatcherDropdown"></div>
+              <small class="error" data-error-for="watcherIds"></small>
+            </div>
+            <div id="watcherRatingsContainer" class="watcher-ratings-container hidden">
+              <!-- Dynamically populated with rating inputs -->
+            </div>
           </div>
           <div class="field">
             <label for="sessionNotes">Session Notes (optional)</label>
@@ -216,8 +229,14 @@ function showSessionForm(movieId, session = null) {
   
   container.classList.remove('hidden');
   
-  // Block manual keyboard input and paste; allow calendar picker interaction
-  dateInput.onkeydown = (e) => e.preventDefault();
+  // Block manual keyboard typing but allow calendar picker
+  dateInput.onkeydown = (e) => {
+    // Allow Tab, Escape, and other navigation keys
+    if (e.key === 'Tab' || e.key === 'Escape' || e.key === 'Enter') {
+      return true;
+    }
+    e.preventDefault();
+  };
   dateInput.onpaste = (e) => e.preventDefault();
   
   if (session) {
@@ -234,8 +253,15 @@ function showSessionForm(movieId, session = null) {
     // Initialize dropdown with selected watchers
     sessionWatcherDropdown = new WatcherDropdown('sessionWatcherDropdown', {
       selectedIds: session.watcherIds || [],
-      placeholder: 'Select watchers...'
+      placeholder: 'Select watchers...',
+      onChange: () => {
+        const currentRatings = getCurrentRatingsFromDOM();
+        renderWatcherRatings(currentRatings);
+      }
     });
+    
+    // Render rating inputs for selected watchers
+    renderWatcherRatings(session.watcherRatings || {});
     
     container.querySelector('.save-session-btn').textContent = 'Update Session';
   } else {
@@ -247,8 +273,15 @@ function showSessionForm(movieId, session = null) {
     // Initialize dropdown with no selection
     sessionWatcherDropdown = new WatcherDropdown('sessionWatcherDropdown', {
       selectedIds: [],
-      placeholder: 'Select watchers...'
+      placeholder: 'Select watchers...',
+      onChange: () => {
+        const currentRatings = getCurrentRatingsFromDOM();
+        renderWatcherRatings(currentRatings);
+      }
     });
+    
+    // Clear rating inputs
+    renderWatcherRatings({});
     
     container.querySelector('.save-session-btn').textContent = 'Save Session';
   }
@@ -256,6 +289,181 @@ function showSessionForm(movieId, session = null) {
   // Scroll to form
   container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   dateInput.focus();
+}
+
+function getCurrentRatingsFromDOM() {
+  const ratings = {};
+  const ratingContainers = document.querySelectorAll('.star-rating');
+  ratingContainers.forEach(container => {
+    const watcherId = container.dataset.watcherId;
+    const rating = parseFloat(container.dataset.rating) || 0;
+    if (rating > 0) {
+      ratings[watcherId] = rating;
+    }
+  });
+  return ratings;
+}
+
+function renderWatcherRatings(existingRatings = {}) {
+  const container = document.getElementById('watcherRatingsContainer');
+  if (!sessionWatcherDropdown) {
+    container.classList.add('hidden');
+    return;
+  }
+  
+  const selectedIds = sessionWatcherDropdown.getSelectedIds();
+  
+  if (selectedIds.length === 0) {
+    container.classList.add('hidden');
+    container.innerHTML = '';
+    return;
+  }
+  
+  container.classList.remove('hidden');
+  
+  const ratingsHtml = selectedIds.map(watcherId => {
+    const watcher = getWatcherById(watcherId);
+    if (!watcher) return '';
+    
+    const firstName = watcher.firstName;
+    const currentRating = existingRatings[watcherId] || 0;
+    
+    return `
+      <div class="watcher-rating-row" data-watcher-id="${watcherId}">
+        <span class="watcher-rating-name">${escapeHtml(firstName)}</span>
+        <div class="star-rating" data-rating="${currentRating}" data-watcher-id="${watcherId}">
+          ${generateStarRating(currentRating, watcherId)}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = ratingsHtml;
+  
+  // Attach star click handlers
+  attachStarRatingHandlers();
+}
+
+function generateStarRating(rating, watcherId) {
+  const stars = [];
+  for (let i = 1; i <= 10; i++) {
+    const starValue = i;
+    const halfValue = i - 0.5;
+    
+    let starClass = 'star-empty';
+    if (rating >= starValue) {
+      starClass = 'star-full';
+    } else if (rating >= halfValue) {
+      starClass = 'star-half';
+    }
+    
+    stars.push(`
+      <span class="star ${starClass}" 
+            data-watcher-id="${watcherId}" 
+            data-value="${starValue}"
+            data-half-value="${halfValue}"
+            title="${starValue} stars">
+        ${starClass === 'star-full' ? '★' : starClass === 'star-half' ? '★' : '☆'}
+      </span>
+    `);
+  }
+  return stars.join('');
+}
+
+function attachStarRatingHandlers() {
+  const starContainers = document.querySelectorAll('.star-rating');
+  
+  starContainers.forEach(container => {
+    const stars = container.querySelectorAll('.star');
+    const watcherId = container.dataset.watcherId || stars[0]?.dataset.watcherId;
+    
+    stars.forEach((star, index) => {
+      // Click handler for setting rating
+      star.addEventListener('click', (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const starWidth = rect.width;
+        const isLeftHalf = clickX < starWidth / 2;
+        
+        const fullValue = parseFloat(e.target.dataset.value);
+        const halfValue = parseFloat(e.target.dataset.halfValue);
+        const currentRating = parseFloat(container.dataset.rating) || 0;
+        
+        let newRating;
+        if (isLeftHalf) {
+          // Clicked left half - set to half value
+          newRating = halfValue;
+        } else {
+          // Clicked right half - set to full value
+          newRating = fullValue;
+        }
+        
+        // If clicking the same value, clear it
+        if (currentRating === newRating) {
+          newRating = 0;
+        }
+        
+        container.dataset.rating = newRating;
+        updateStarDisplay(container, newRating, watcherId);
+      });
+      
+      // Hover handler for preview
+      star.addEventListener('mousemove', (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const starWidth = rect.width;
+        const isLeftHalf = mouseX < starWidth / 2;
+        
+        const fullValue = parseFloat(e.target.dataset.value);
+        const halfValue = parseFloat(e.target.dataset.halfValue);
+        const previewRating = isLeftHalf ? halfValue : fullValue;
+        
+        showStarPreview(container, previewRating);
+      });
+    });
+    
+    // Reset to actual rating when mouse leaves
+    container.addEventListener('mouseleave', () => {
+      const currentRating = parseFloat(container.dataset.rating) || 0;
+      updateStarDisplay(container, currentRating, watcherId);
+    });
+  });
+}
+
+function showStarPreview(container, previewRating) {
+  const stars = container.querySelectorAll('.star');
+  stars.forEach((star, index) => {
+    const starValue = index + 1;
+    const halfValue = starValue - 0.5;
+    
+    star.classList.remove('star-full', 'star-half', 'star-empty', 'star-preview');
+    
+    if (previewRating >= starValue) {
+      star.classList.add('star-full');
+    } else if (previewRating >= halfValue) {
+      star.classList.add('star-half');
+    } else {
+      star.classList.add('star-empty');
+    }
+  });
+}
+
+function updateStarDisplay(container, rating, watcherId) {
+  const stars = container.querySelectorAll('.star');
+  stars.forEach((star, index) => {
+    const starValue = index + 1;
+    const halfValue = starValue - 0.5;
+    
+    star.classList.remove('star-full', 'star-half', 'star-empty');
+    
+    if (rating >= starValue) {
+      star.classList.add('star-full');
+    } else if (rating >= halfValue) {
+      star.classList.add('star-half');
+    } else {
+      star.classList.add('star-empty');
+    }
+  });
 }
 
 function hideSessionForm() {
@@ -273,11 +481,24 @@ function handleSessionSubmit(movie) {
   const dateString = formData.get('watchedDate');
   const watchedDate = dateStringToTimestamp(dateString);
   
+  // Collect watcher ratings from star ratings
+  const watcherRatings = {};
+  const ratingContainers = document.querySelectorAll('.star-rating');
+  ratingContainers.forEach(container => {
+    const rating = parseFloat(container.dataset.rating);
+    if (rating > 0) {
+      const row = container.closest('.watcher-rating-row');
+      const watcherId = row.dataset.watcherId;
+      watcherRatings[watcherId] = rating;
+    }
+  });
+  
   const fields = {
     movieId: movie.id,
     watchedDate: watchedDate,
     watcherIds: sessionWatcherDropdown ? sessionWatcherDropdown.getSelectedIds() : [],
-    notes: formData.get('notes') || ''
+    notes: formData.get('notes') || '',
+    watcherRatings: watcherRatings
   };
   
   const errors = validateSessionFields(fields);

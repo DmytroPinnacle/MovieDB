@@ -5,6 +5,7 @@ import { getWatcherById } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
 import { getSessionsByWatcherId, getWatchedMovieIdsByWatcherId } from './session-storage.js';
 import { loadMovies } from './storage.js';
+import { initializeSeedData } from './DataSeed/initializer.js';
 
 console.log('All imports successful');
 
@@ -76,6 +77,7 @@ const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep
 // Initialize the page
 function init() {
   console.log('init() called');
+  initializeSeedData(); // Initialize seed data if needed
   try {
     console.log('watcherId:', watcherId);
     if (!watcherId) {

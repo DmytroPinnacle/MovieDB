@@ -5,9 +5,7 @@ import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatch
 import { createWatcher, validateWatcherFields, updateWatcher as mergeWatcher, getWatcherFullName } from './watcher-models.js';
 import { loadSessions, addSession, getSessions } from './session-storage.js';
 import { createSession } from './session-models.js';
-import { SEED_MOVIES } from './DataSeed/seed.js';
-import { SEED_WATCHERS } from './DataSeed/watcher-seed.js';
-import { SEED_SESSIONS } from './DataSeed/session-seed.js';
+import { initializeSeedData } from './DataSeed/initializer.js';
 import { 
   renderMovieList, populateGenreFilter, populateWatcherCheckboxes, resetForm, showErrors, 
   renderWatcherList, fillWatcherForm, resetWatcherForm, showWatcherModal, hideWatcherModal,
@@ -22,89 +20,17 @@ const viewState = {
 };
 
 function init() {
-  const watchers = loadWatchers();
-  if (!watchers.length) {
-    seedInitialWatchers();
-  }
-  loadSessions(); // Load sessions data
-  const movies = loadMovies();
-  if (!movies.length) {
-    seedInitialData();
-  }
-  const sessions = getSessions();
-  if (!sessions.length && watchers.length && movies.length) {
-    seedInitialSessions();
-  }
+  // Initialize seed data if needed
+  initializeSeedData();
+  
+  // Load data into UI
+  loadWatchers();
+  loadMovies();
+  loadSessions();
+  
   populateGenreFilter();
   renderMovieList(viewState);
   wireEvents();
-}
-
-function seedInitialWatchers() {
-  SEED_WATCHERS.forEach(([firstName, lastName]) => {
-    const watcher = createWatcher({ firstName, lastName: lastName || '' });
-    addWatcher(watcher);
-  });
-  console.info(`Seeded ${SEED_WATCHERS.length} watchers.`);
-}
-
-function seedInitialSessions() {
-  const watchers = getWatchers();
-  const movies = getMovies();
-  
-  SEED_SESSIONS.forEach(([movieIdx, watcherIdxs, dateStr, notes, ratings]) => {
-    if (movieIdx >= movies.length) return;
-    
-    const movie = movies[movieIdx];
-    const watcherIds = watcherIdxs
-      .filter(idx => idx < watchers.length)
-      .map(idx => watchers[idx].id);
-    
-    if (watcherIds.length === 0) return;
-    
-    // Convert date string to timestamp
-    const [year, month, day] = dateStr.split('-').map(Number);
-    const watchedDate = new Date(year, month - 1, day).getTime();
-    
-    // Convert rating indexes to watcher IDs
-    const watcherRatings = {};
-    Object.entries(ratings).forEach(([watcherIdx, rating]) => {
-      const idx = parseInt(watcherIdx);
-      if (idx < watchers.length) {
-        watcherRatings[watchers[idx].id] = rating;
-      }
-    });
-    
-    const session = createSession({
-      movieId: movie.id,
-      watcherIds: watcherIds,
-      watchedDate: watchedDate,
-      notes: notes || '',
-      watcherRatings: watcherRatings
-    });
-    
-    addSession(session);
-  });
-  
-  console.info(`Seeded ${SEED_SESSIONS.length} watching sessions.`);
-}
-
-function seedInitialData() {
-  // Convert simple arrays into movie objects using createMovie
-  SEED_MOVIES.forEach(([title, year, genre, rating, imdbId, posterUrl, kinopoiskId]) => {
-    const movie = createMovie({ 
-      title, 
-      year, 
-      genre, 
-      rating, 
-      posterUrl: posterUrl || '', 
-      notes: '', 
-      imdbId: imdbId || '',
-      kinopoiskId: kinopoiskId || ''
-    });
-    addMovie(movie);
-  });
-  console.info(`Seeded ${SEED_MOVIES.length} movies.`);
 }
 
 function wireEvents() {

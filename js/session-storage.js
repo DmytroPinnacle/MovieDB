@@ -1,7 +1,8 @@
-// Watching session storage layer
-
-const STORAGE_KEY = 'moviedb.sessions.v1';
-let sessionsCache = null;
+/**
+ * Session Storage - Compatibility Layer
+ * Wraps SessionRepository to maintain existing API
+ */
+import { sessionRepository } from './dal/index.js';
 
 /**
  * Convert a date string (YYYY-MM-DD) to a timestamp (milliseconds since epoch).
@@ -15,101 +16,46 @@ function dateStringToTimestamp(dateString) {
 }
 
 export function loadSessions() {
-  if (sessionsCache) return sessionsCache;
-  const raw = localStorage.getItem(STORAGE_KEY);
-  let sessions = raw ? JSON.parse(raw) : [];
-  
-  // Migration: Convert old string dates to timestamps
-  let needsSave = false;
-  sessions = sessions.map(session => {
-    if (typeof session.watchedDate === 'string') {
-      session.watchedDate = dateStringToTimestamp(session.watchedDate);
-      needsSave = true;
-    }
-    return session;
-  });
-  
-  if (needsSave) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-  }
-  
-  sessionsCache = sessions;
-  return sessionsCache;
-}
-
-function saveSessions(sessions) {
-  sessionsCache = sessions;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+  return sessionRepository.getAll();
 }
 
 export function getSessions() {
-  return loadSessions();
+  return sessionRepository.getAll();
 }
 
 export function getSessionById(id) {
-  return loadSessions().find(s => s.id === id);
+  return sessionRepository.getById(id);
 }
 
 export function getSessionsByMovieId(movieId) {
-  return loadSessions()
-    .filter(s => s.movieId === movieId)
-    .sort((a, b) => b.watchedDate - a.watchedDate); // Most recent first (timestamp comparison)
+  return sessionRepository.getByMovieId(movieId);
 }
 
 export function getLatestSessionByMovieId(movieId) {
-  const sessions = getSessionsByMovieId(movieId);
-  return sessions.length > 0 ? sessions[0] : null;
+  return sessionRepository.getLatestByMovieId(movieId);
 }
 
 export function addSession(session) {
-  const sessions = loadSessions();
-  sessions.push(session);
-  saveSessions(sessions);
-  sessionsCache = null; // Invalidate cache
-  return session;
+  return sessionRepository.add(session);
 }
 
 export function updateSessionInStore(id, updatedSession) {
-  const sessions = loadSessions();
-  const idx = sessions.findIndex(s => s.id === id);
-  if (idx === -1) return null;
-  sessions[idx] = updatedSession;
-  saveSessions(sessions);
-  sessionsCache = null; // Invalidate cache
+  sessionRepository.update(id, updatedSession);
   return updatedSession;
 }
 
 export function deleteSession(id) {
-  const sessions = loadSessions();
-  const filtered = sessions.filter(s => s.id !== id);
-  saveSessions(filtered);
-  sessionsCache = null; // Invalidate cache
+  sessionRepository.delete(id);
 }
 
 export function deleteSessionsByMovieId(movieId) {
-  const sessions = loadSessions();
-  const filtered = sessions.filter(s => s.movieId !== movieId);
-  saveSessions(filtered);
-  sessionsCache = null; // Invalidate cache
+  sessionRepository.deleteByMovieId(movieId);
 }
 
 export function getSessionsByWatcherId(watcherId) {
-  console.log('getSessionsByWatcherId called with:', watcherId);
-  const sessions = loadSessions();
-  console.log('Total sessions in storage:', sessions.length);
-  const filtered = sessions.filter(s => {
-    const hasWatcherIds = s.watcherIds && Array.isArray(s.watcherIds);
-    const includesWatcher = hasWatcherIds && s.watcherIds.includes(watcherId);
-    console.log('Session:', s.id, 'watcherIds:', s.watcherIds, 'includes watcher:', includesWatcher);
-    return includesWatcher;
-  });
-  console.log('Filtered sessions:', filtered.length);
-  return filtered.sort((a, b) => b.watchedDate - a.watchedDate); // Most recent first
+  return sessionRepository.getByWatcherId(watcherId);
 }
 
 export function getWatchedMovieIdsByWatcherId(watcherId) {
-  const sessions = getSessionsByWatcherId(watcherId);
-  const movieIds = new Set();
-  sessions.forEach(s => movieIds.add(s.movieId));
-  return Array.from(movieIds);
+  return sessionRepository.getWatchedMovieIdsByWatcherId(watcherId);
 }

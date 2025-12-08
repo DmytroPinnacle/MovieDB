@@ -5,6 +5,7 @@
 
 import { createWatcher, validateWatcherFields, updateWatcher, getWatcherFullName } from './watcher-models.js';
 import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatchers, toggleFavorite, isFavorite, getFavorites } from './watcher-storage.js';
+import { initializeSeedData } from './DataSeed/initializer.js';
 
 // ===== STATE MANAGEMENT =====
 let currentEditId = null;
@@ -25,7 +26,8 @@ const searchInput = document.getElementById('searchInput');
 
 // ===== INITIALIZATION =====
 function init() {
-  loadWatchers(); // Load from localStorage
+  initializeSeedData(); // Initialize seed data if needed
+  loadWatchers();
   renderWatchers();
   attachEventListeners();
 }

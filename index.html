@@ -30,20 +30,10 @@
             <small class="error" data-error-for="year"></small>
         </div>
         <div class="field">
-          <label for="genre">Genre</label>
-          <input id="genre" name="genre" list="genreList" required />
-          <datalist id="genreList">
-            <option>Action</option>
-            <option>Comedy</option>
-            <option>Drama</option>
-            <option>Sci-Fi</option>
-            <option>Horror</option>
-            <option>Fantasy</option>
-            <option>Romance</option>
-            <option>Thriller</option>
-            <option>Documentary</option>
-          </datalist>
-          <small class="error" data-error-for="genre"></small>
+          <label>Genres</label>
+          <div id="genreDropdown"></div>
+          <small class="help">Select one or more genres</small>
+          <small class="error" data-error-for="genres"></small>
         </div>
         <div class="field">
           <label for="rating">Rating (0-10)</label>
@@ -72,14 +62,9 @@
           <textarea id="notes" name="notes" rows="3" maxlength="500"></textarea>
           <small class="help">Short personal notes (max 500 chars)</small>
         </div>
-        <div class="field">
-          <label>Watchers</label>
-          <div id="watcherCheckboxes"></div>
-        </div>
         <div class="actions">
           <button type="submit" class="primary" id="saveBtn">Save</button>
           <button type="reset" id="resetBtn">Reset</button>
-          <button type="button" id="cancelEditBtn" class="hidden">Cancel Edit</button>
         </div>
       </form>
     </section>
@@ -87,9 +72,10 @@
       <h2 id="listTitle">Movies</h2>
       <div class="movie-controls">
         <input id="searchInput" type="search" placeholder="Search by title..." aria-label="Search movies by title" />
-        <select id="filterGenre" aria-label="Filter by genre">
-          <option value="">All Genres</option>
-        </select>
+        <div id="filterGenre" class="genre-multiselect" aria-label="Filter by genre">
+          <div class="multiselect-selected" tabindex="0">All Genres</div>
+          <div class="multiselect-dropdown hidden"></div>
+        </div>
         <select id="sortSelect" aria-label="Sort movies">
           <option value="title-asc">Title A→Z</option>
           <option value="title-desc">Title Z→A</option>

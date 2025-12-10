@@ -6,8 +6,10 @@ import { loadSessions, getSessionsByMovieId, addSession, updateSessionInStore, d
 import { initializeSeedData } from './DataSeed/initializer.js';
 import { createSession, validateSessionFields, updateSession, dateStringToTimestamp } from './session-models.js';
 import { WatcherDropdown } from './watcher-dropdown.js';
+import { GenreDropdown } from './genre-dropdown.js';
 
 let sessionWatcherDropdown = null;
+let genreDropdown = null;
 
 function getMovieIdFromURL() {
   const params = new URLSearchParams(window.location.search);
@@ -70,7 +72,7 @@ function renderMovieDetail(movie) {
         </div>
         <div class="detail-meta">
           <div class="detail-meta-item">📅 ${movie.year}</div>
-          <div class="detail-meta-item">🎭 ${escapeHtml(movie.genre)}</div>
+          <div class="detail-meta-item">🎭 ${escapeHtml(Array.isArray(movie.genres) ? movie.genres.join(', ') : (movie.genre || 'Unknown'))}</div>
           ${ratingHtml}
         </div>
         <div class="detail-actions">
@@ -92,10 +94,10 @@ function renderMovieDetail(movie) {
         <span class="detail-field-value">${movie.year}</span>
         <button class="edit-field-btn" aria-label="Edit year">✏️</button>
       </div>
-      <div class="detail-field editable" data-field="genre">
-        <span class="detail-field-label">Genre:</span>
-        <span class="detail-field-value">${escapeHtml(movie.genre)}</span>
-        <button class="edit-field-btn" aria-label="Edit genre">✏️</button>
+      <div class="detail-field editable" data-field="genres">
+        <span class="detail-field-label">Genres:</span>
+        <span class="detail-field-value">${escapeHtml(Array.isArray(movie.genres) ? movie.genres.join(', ') : (movie.genre || 'Unknown'))}</span>
+        <button class="edit-field-btn" aria-label="Edit genres">✏️</button>
       </div>
       <div class="detail-field editable" data-field="rating">
         <span class="detail-field-label">Rating:</span>
@@ -824,41 +826,42 @@ function enterNotesEditMode(sectionContainer, movie) {
 function enterEditMode(fieldContainer, fieldName, movie, valueSpan) {
   const currentValue = fieldName === 'rating' 
     ? (movie[fieldName] != null ? movie[fieldName] : '')
-    : movie[fieldName];
+    : (fieldName === 'genres'
+      ? (Array.isArray(movie.genres) ? movie.genres : (movie.genre ? [movie.genre] : []))
+      : movie[fieldName]);
   
   let input;
+  let isDropdown = false;
+  
   if (fieldName === 'year') {
     input = document.createElement('input');
     input.type = 'number';
     input.min = 1888;
     input.max = 2100;
+    input.value = currentValue;
   } else if (fieldName === 'rating') {
     input = document.createElement('input');
     input.type = 'number';
     input.min = 0;
     input.max = 10;
     input.step = 0.1;
-  } else if (fieldName === 'genre') {
-    input = document.createElement('select');
-    const genres = ['Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror', 'Fantasy', 'Romance', 'Thriller', 'Documentary', 'Animation', 'Crime', 'Biography'];
-    genres.forEach(genre => {
-      const option = document.createElement('option');
-      option.value = genre;
-      option.textContent = genre;
-      if (genre === currentValue) {
-        option.selected = true;
-      }
-      input.appendChild(option);
-    });
+    input.value = currentValue;
+  } else if (fieldName === 'genres') {
+    // Use dropdown for genres
+    isDropdown = true;
+    const dropdownContainer = document.createElement('div');
+    dropdownContainer.id = 'genreDropdownInline';
+    dropdownContainer.style.marginBottom = '0.5rem';
+    input = dropdownContainer;
   } else {
     input = document.createElement('input');
     input.type = 'text';
-  }
-  
-  if (fieldName !== 'genre') {
     input.value = currentValue;
   }
-  input.className = 'detail-field-input';
+  
+  if (!isDropdown) {
+    input.className = 'detail-field-input';
+  }
   
   const saveBtn = document.createElement('button');
   saveBtn.textContent = '✓';
@@ -879,18 +882,37 @@ function enterEditMode(fieldContainer, fieldName, movie, valueSpan) {
   valueSpan.appendChild(saveBtn);
   valueSpan.appendChild(cancelBtn);
   
-  input.focus();
-  if (fieldName !== 'genre') {
+  // Initialize genre dropdown if this is the genres field
+  if (fieldName === 'genres') {
+    // Fix for overflow hidden clipping the dropdown
+    valueSpan.style.overflow = 'visible';
+    
+    genreDropdown = new GenreDropdown('genreDropdownInline', {
+      selectedGenres: currentValue,
+      placeholder: 'Select genres...'
+    });
+  } else {
+    input.focus();
     input.select();
   }
   
   const save = async () => {
-    const newValue = fieldName === 'genre' ? input.value : input.value.trim();
+    let newValue;
     
-    // Validate
-    if (fieldName === 'title' && !newValue) {
-      alert('Title is required');
-      return;
+    if (fieldName === 'genres') {
+      newValue = genreDropdown.getSelectedGenres();
+      if (!newValue || newValue.length === 0) {
+        alert('At least one genre is required');
+        return;
+      }
+    } else {
+      newValue = input.value.trim();
+      
+      // Validate
+      if (fieldName === 'title' && !newValue) {
+        alert('Title is required');
+        return;
+      }
     }
     if (fieldName === 'year') {
       const year = Number(newValue);
@@ -926,11 +948,19 @@ function enterEditMode(fieldContainer, fieldName, movie, valueSpan) {
     const { updateMovie } = await import('./models.js');
     
     // Update movie
+    let updateValue;
+    if (fieldName === 'genres') {
+      // Already an array from dropdown
+      updateValue = newValue;
+    } else if (fieldName === 'year' || fieldName === 'rating') {
+      updateValue = newValue === '' ? null : Number(newValue);
+    } else {
+      updateValue = newValue === '' ? '' : newValue;
+    }
+    
     const updates = {
       ...movie,
-      [fieldName]: fieldName === 'year' || fieldName === 'rating' 
-        ? (newValue === '' ? null : Number(newValue))
-        : (newValue === '' ? '' : newValue)
+      [fieldName]: updateValue
     };
     
     const updated = updateMovie(movie, updates);
@@ -946,22 +976,34 @@ function enterEditMode(fieldContainer, fieldName, movie, valueSpan) {
   };
   
   const cancel = () => {
+    if (fieldName === 'genres' && genreDropdown) {
+      genreDropdown.destroy();
+      genreDropdown = null;
+    }
     valueSpan.innerHTML = originalContent;
     editBtn.style.display = '';
+    
+    // Restore overflow style
+    if (fieldName === 'genres') {
+      valueSpan.style.overflow = '';
+    }
   };
   
   saveBtn.addEventListener('click', save);
   cancelBtn.addEventListener('click', cancel);
   
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      save();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      cancel();
-    }
-  });
+  // Only add keyboard events for non-dropdown fields
+  if (fieldName !== 'genres') {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        save();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        cancel();
+      }
+    });
+  }
 }
 
 // Initialize on page load

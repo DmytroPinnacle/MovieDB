@@ -7,7 +7,7 @@ import { getLatestSessionByMovieId } from './session-storage.js';
 export function qs(sel, parent=document){ return parent.querySelector(sel); }
 export function qsa(sel, parent=document){ return Array.from(parent.querySelectorAll(sel)); }
 
-export function renderMovieList({ filterText='', genre='', sort='title-asc' }) {
+export function renderMovieList({ filterText='', genres=[], sort='title-asc' }) {
   const listEl = qs('#movieList');
   const emptyState = qs('#emptyState');
   const tpl = qs('#movieItemTemplate');
@@ -16,7 +16,16 @@ export function renderMovieList({ filterText='', genre='', sort='title-asc' }) {
   // filter
   const ft = filterText.trim().toLowerCase();
   if (ft) movies = movies.filter(m => m.title.toLowerCase().includes(ft));
-  if (genre) movies = movies.filter(m => m.genre.toLowerCase() === genre.toLowerCase());
+  if (genres.length > 0) {
+    movies = movies.filter(m => {
+      // Handle both old 'genre' string and new 'genres' array
+      const movieGenres = Array.isArray(m.genres) ? m.genres : (m.genre ? [m.genre] : []);
+      // AND logic: movie must have ALL selected genres
+      return genres.every(selectedGenre => 
+        movieGenres.some(movieGenre => movieGenre.toLowerCase() === selectedGenre.toLowerCase())
+      );
+    });
+  }
 
   // sort
   const [field, dir] = sort.split('-');
@@ -65,7 +74,12 @@ export function renderMovieList({ filterText='', genre='', sort='title-asc' }) {
       .filter(Boolean)
       .map(w => w.firstName);
     
-    node.querySelector('.meta').textContent = `${m.genre} • ${m.year}${m.rating!=null ? ' • ⭐ ' + m.rating : ''}`;
+    // Display first genre only (handle both old 'genre' string and new 'genres' array)
+    const displayGenre = Array.isArray(m.genres) && m.genres.length > 0 
+      ? m.genres[0] 
+      : (m.genre || 'Unknown');
+    
+    node.querySelector('.meta').textContent = `${displayGenre} • ${m.year}${m.rating!=null ? ' • ⭐ ' + m.rating : ''}`;
     
     // Add watchers as small text below notes
     const watchersSection = node.querySelector('.watchers-section');
@@ -100,44 +114,28 @@ export function renderMovieList({ filterText='', genre='', sort='title-asc' }) {
 }
 
 export function populateGenreFilter() {
-  const select = qs('#filterGenre');
+  const container = qs('#filterGenre');
+  const dropdown = container.querySelector('.multiselect-dropdown');
   const movies = getMovies();
-  const genres = Array.from(new Set(movies.map(m => m.genre))).sort();
-  const current = select.value;
-  select.innerHTML = '<option value="">All Genres</option>' + genres.map(g => `<option value="${g}">${g}</option>`).join('');
-  select.value = current;
-}
-
-export function populateWatcherCheckboxes(selectedIds = []) {
-  const container = qs('#watcherCheckboxes');
-  const watchers = getWatchers().sort((a, b) => {
-    const nameA = getWatcherFullName(a).toLowerCase();
-    const nameB = getWatcherFullName(b).toLowerCase();
-    return nameA.localeCompare(nameB);
+  // Collect all unique genres from all movies (handling both old and new format)
+  const allGenres = new Set();
+  movies.forEach(m => {
+    if (Array.isArray(m.genres)) {
+      m.genres.forEach(g => allGenres.add(g));
+    } else if (m.genre) {
+      allGenres.add(m.genre);
+    }
   });
-  
-  if (watchers.length === 0) {
-    container.innerHTML = '<span class="no-watchers">No watchers available. Click "Manage Watchers" to add.</span>';
-    return;
-  }
-  
-  container.innerHTML = watchers.map(w => {
-    const checked = selectedIds.includes(w.id) ? 'checked' : '';
-    return `
-      <label class="watcher-checkbox-label">
-        <input type="checkbox" name="watcherIds" value="${w.id}" ${checked} />
-        <span>${getWatcherFullName(w)}</span>
-      </label>
-    `;
-  }).join('');
+  const genres = Array.from(allGenres).sort();
+  dropdown.innerHTML = genres.map(g => 
+    `<div class="multiselect-option" data-genre="${g}">${g}</div>`
+  ).join('');
 }
 
 export function resetForm() {
   const form = qs('#movieForm');
   form.reset();
   qs('#movieId').value='';
-  populateWatcherCheckboxes([]);
-  qs('#cancelEditBtn').classList.add('hidden');
   qs('#formTitle').textContent = 'Add Movie';
   qs('#saveBtn').textContent = 'Save';
 }

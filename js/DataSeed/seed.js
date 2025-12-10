@@ -1,13 +1,13 @@
 // Seed dataset of 100 well-known films.
 // Poster URLs from IMDB CDN - these are publicly accessible thumbnails
 // Ratings here are approximate public consensus (0-10 scale) for demonstration only.
-// Genres simplified to a primary category.
-// Format: [title, year, genre, rating, imdbId, posterUrl, kinopoiskId]
+// Genres can include multiple categories.
+// Format: [title, year, genres (array), rating, imdbId, posterUrl, kinopoiskId]
 export const SEED_MOVIES = [
   [
     "The Godfather",
     1972,
-    "Crime",
+    ["Crime", "Drama"],
     9.2,
     "tt0068646",
     "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
@@ -16,7 +16,7 @@ export const SEED_MOVIES = [
   [
     "The Godfather: Part II",
     1974,
-    "Crime",
+    ["Crime", "Drama"],
     9.0,
     "tt0071562",
     "https://m.media-amazon.com/images/M/MV5BMWMwMGQzZTItY2JlNC00OWZiLWIyMDctNDk2ZDQ2YjRjMWQ0XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
@@ -24,7 +24,7 @@ export const SEED_MOVIES = [
   [
     "The Dark Knight",
     2008,
-    "Action",
+    ["Action", "Crime", "Thriller"],
     9.0,
     "tt0468569",
     "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg",
@@ -32,7 +32,7 @@ export const SEED_MOVIES = [
   [
     "The Shawshank Redemption",
     1994,
-    "Drama",
+    ["Drama"],
     9.3,
     "tt0111161",
     "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
@@ -40,7 +40,7 @@ export const SEED_MOVIES = [
   [
     "Pulp Fiction",
     1994,
-    "Crime",
+    ["Crime", "Thriller"],
     8.9,
     "tt0110912",
     "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
@@ -48,7 +48,7 @@ export const SEED_MOVIES = [
   [
     "Schindler's List",
     1993,
-    "Drama",
+    ["Drama", "Biography"],
     9.0,
     "tt0108052",
     "https://m.media-amazon.com/images/M/MV5BNDE4OTMxMTctNmRhYy00NWE2LTg3YzItYTk3M2UwOTU5Njg4XkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
@@ -56,7 +56,7 @@ export const SEED_MOVIES = [
   [
     "Fight Club",
     1999,
-    "Drama",
+    ["Drama", "Thriller"],
     8.8,
     "tt0137523",
     "https://m.media-amazon.com/images/M/MV5BNDIzNDU0YzEtYzE5Ni00ZjlkLTk5ZjgtNjM3NWE4YzA3Nzk3XkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg",
@@ -64,7 +64,7 @@ export const SEED_MOVIES = [
   [
     "Inception",
     2010,
-    "Sci-Fi",
+    ["Sci-Fi", "Action", "Thriller"],
     8.8,
     "tt1375666",
     "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
@@ -72,7 +72,7 @@ export const SEED_MOVIES = [
   [
     "Forrest Gump",
     1994,
-    "Drama",
+    ["Drama", "Romance"],
     8.8,
     "tt0109830",
     "https://m.media-amazon.com/images/M/MV5BNWIwODRlZTUtY2U3ZS00Yzg1LWJhNzYtMmZiYmEyNmU1NjMzXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
@@ -81,7 +81,7 @@ export const SEED_MOVIES = [
   [
     "The Matrix",
     1999,
-    "Sci-Fi",
+    ["Sci-Fi", "Action"],
     8.7,
     "tt0133093",
     "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
@@ -89,7 +89,7 @@ export const SEED_MOVIES = [
   [
     "Goodfellas",
     1990,
-    "Crime",
+    ["Crime", "Drama"],
     8.7,
     "tt0099685",
     "https://m.media-amazon.com/images/M/MV5BY2NkZjEzMDgtN2RjYy00YzM1LWI4ZmQtMjIwYjFjNmI3ZGEwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
@@ -97,7 +97,7 @@ export const SEED_MOVIES = [
   [
     "Se7en",
     1995,
-    "Thriller",
+    ["Thriller", "Crime"],
     8.6,
     "tt0114369",
     "https://m.media-amazon.com/images/M/MV5BOTUwODM5MTctZjczMi00OTk4LTg3NWUtNmVhMTAzNTNjYjcyXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",

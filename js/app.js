@@ -6,8 +6,9 @@ import { createWatcher, validateWatcherFields, updateWatcher as mergeWatcher, ge
 import { loadSessions, addSession, getSessions } from './session-storage.js';
 import { createSession } from './session-models.js';
 import { initializeSeedData } from './DataSeed/initializer.js';
+import { GenreDropdown } from './genre-dropdown.js';
 import { 
-  renderMovieList, populateGenreFilter, populateWatcherCheckboxes, resetForm, showErrors, 
+  renderMovieList, populateGenreFilter, resetForm, showErrors, 
   renderWatcherList, fillWatcherForm, resetWatcherForm, showWatcherModal, hideWatcherModal,
   qs 
 } from './ui.js';
@@ -15,9 +16,11 @@ import {
 // State for filters/sort
 const viewState = {
   filterText: '',
-  genre: '',
+  genres: [],
   sort: 'title-asc'
 };
+
+let genreDropdown = null;
 
 function init() {
   // Initialize seed data if needed
@@ -28,6 +31,12 @@ function init() {
   loadMovies();
   loadSessions();
   
+  // Initialize genre dropdown
+  genreDropdown = new GenreDropdown('genreDropdown', {
+    selectedGenres: [],
+    placeholder: 'Select genres...'
+  });
+  
   populateGenreFilter();
   renderMovieList(viewState);
   wireEvents();
@@ -35,7 +44,7 @@ function init() {
 
 function wireEvents() {
   const searchInput = qs('#searchInput');
-  const genreSelect = qs('#filterGenre');
+  const genreMultiselect = qs('#filterGenre');
   const sortSelect = qs('#sortSelect');
   const form = qs('#movieForm');
   const list = qs('#movieList');
@@ -44,10 +53,43 @@ function wireEvents() {
     viewState.filterText = searchInput.value;
     renderMovieList(viewState);
   });
-  genreSelect.addEventListener('change', () => {
-    viewState.genre = genreSelect.value;
-    renderMovieList(viewState);
+  
+  // Multi-select genre filter events
+  const selectedDisplay = genreMultiselect.querySelector('.multiselect-selected');
+  const dropdown = genreMultiselect.querySelector('.multiselect-dropdown');
+  
+  selectedDisplay.addEventListener('click', () => {
+    dropdown.classList.toggle('hidden');
   });
+  
+  selectedDisplay.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      dropdown.classList.toggle('hidden');
+    }
+  });
+  
+  dropdown.addEventListener('click', (e) => {
+    if (e.target.classList.contains('multiselect-option')) {
+      const genre = e.target.dataset.genre;
+      if (viewState.genres.includes(genre)) {
+        viewState.genres = viewState.genres.filter(g => g !== genre);
+        e.target.classList.remove('selected');
+      } else {
+        viewState.genres.push(genre);
+        e.target.classList.add('selected');
+      }
+      updateGenreDisplay();
+      renderMovieList(viewState);
+    }
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (!genreMultiselect.contains(e.target)) {
+      dropdown.classList.add('hidden');
+    }
+  });
+  
   sortSelect.addEventListener('change', () => {
     viewState.sort = sortSelect.value;
     renderMovieList(viewState);
@@ -55,6 +97,20 @@ function wireEvents() {
 
   form.addEventListener('submit', onSubmitForm);
   form.addEventListener('reset', () => setTimeout(()=> showErrors({}), 0));
+  
+  function updateGenreDisplay() {
+    if (viewState.genres.length === 0) {
+      selectedDisplay.textContent = 'All Genres';
+      selectedDisplay.removeAttribute('title');
+    } else {
+      selectedDisplay.textContent = viewState.genres.join(', ');
+      if (viewState.genres.length > 2) {
+        selectedDisplay.setAttribute('title', viewState.genres.join(', '));
+      } else {
+        selectedDisplay.removeAttribute('title');
+      }
+    }
+  }
 
   // Event delegation for list actions
   list.addEventListener('click', (e) => {
@@ -116,6 +172,9 @@ function onSubmitForm(e) {
   const formData = new FormData(form);
   const fields = Object.fromEntries(formData.entries());
   
+  // Get selected genres from dropdown
+  fields.genres = genreDropdown.getSelectedGenres();
+  
   const errors = validateMovieFields(fields);
   showErrors(errors);
   if (Object.keys(errors).length) return;
@@ -123,6 +182,8 @@ function onSubmitForm(e) {
   const movie = createMovie(fields);
   addMovie(movie);
   resetForm();
+  // Reset genre dropdown
+  genreDropdown.setSelectedGenres([]);
   populateGenreFilter();
   renderMovieList(viewState);
   qs('#title').focus();

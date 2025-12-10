@@ -36,11 +36,11 @@ export function seedMovies() {
     return;
   }
   
-  SEED_MOVIES.forEach(([title, year, genre, rating, imdbId, posterUrl, kinopoiskId]) => {
+  SEED_MOVIES.forEach(([title, year, genres, rating, imdbId, posterUrl, kinopoiskId]) => {
     const movie = createMovie({ 
       title, 
       year, 
-      genre, 
+      genres: Array.isArray(genres) ? genres : [genres], // Handle both old and new format
       rating, 
       posterUrl: posterUrl || '', 
       notes: '', 

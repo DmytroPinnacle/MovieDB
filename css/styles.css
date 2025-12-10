@@ -70,9 +70,21 @@ a.small.secondary:hover {
 .panel h2 { margin-top:0; font-size:1.15rem; letter-spacing:.5px; }
 
 .movie-controls { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; align-items:center; }
-.movie-controls input, .movie-controls select { padding:.5rem .65rem; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:var(--radius); flex:1; min-width:150px; }
+.movie-controls input, .movie-controls select { padding:.5rem .65rem; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:var(--radius); flex:1; min-width:150px; height:38px; line-height:1.4; }
 .movie-controls input { min-width:200px; }
 .movie-controls input:focus, .movie-controls select:focus, form input:focus, form textarea:focus { outline: var(--focus); }
+
+/* Multi-select genre filter */
+.genre-multiselect { position:relative; min-width:150px; flex:1; }
+.multiselect-selected { padding:.5rem .65rem; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:var(--radius); cursor:pointer; user-select:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; height:38px; line-height:1.4; }
+.multiselect-selected:hover { border-color:#475569; }
+.multiselect-selected:focus { outline: var(--focus); }
+.multiselect-dropdown { position:absolute; top:100%; left:0; right:0; margin-top:.25rem; background:#0f172a; border:1px solid #334155; border-radius:var(--radius); max-height:250px; overflow-y:auto; z-index:100; box-shadow:0 4px 6px #00000040; }
+.multiselect-option { padding:.5rem .65rem; cursor:pointer; transition:background .15s; border-bottom:1px solid #1e293b; }
+.multiselect-option:last-child { border-bottom:none; }
+.multiselect-option:hover { background:#1e293b; }
+.multiselect-option.selected { background:#1e3a5f; color:#60a5fa; font-weight:500; }
+.multiselect-option.selected::before { content:'✓ '; margin-right:.3rem; }
 
 form { display:flex; flex-direction:column; gap:.85rem; }
 .field { display:flex; flex-direction:column; gap:.35rem; }
@@ -264,6 +276,7 @@ form { display:flex; flex-direction:column; gap:.85rem; }
 .watcher-dropdown {
   position: relative;
   width: 100%;
+  z-index: 10;
 }
 
 .watcher-dropdown-trigger {
@@ -277,6 +290,8 @@ form { display:flex; flex-direction:column; gap:.85rem; }
   cursor: pointer;
   min-height: 42px;
   user-select: none;
+  position: relative;
+  z-index: 1;
 }
 
 .watcher-dropdown-trigger:hover {
@@ -344,7 +359,7 @@ form { display:flex; flex-direction:column; gap:.85rem; }
   border: 1px solid #334155;
   border-radius: var(--radius);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
+  z-index: 9999;
   max-height: 300px;
   display: flex;
   flex-direction: column;

@@ -1,13 +1,13 @@
 // UI rendering + DOM helpers
 import { getMovies } from './storage.js';
-import { getWatchers, getWatcherById } from './watcher-storage.js';
+import { getWatchers, getWatcherById, isFavorite } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
 import { getLatestSessionByMovieId } from './session-storage.js';
 
 export function qs(sel, parent=document){ return parent.querySelector(sel); }
 export function qsa(sel, parent=document){ return Array.from(parent.querySelectorAll(sel)); }
 
-export function renderMovieList({ filterText='', genres=[], sort='title-asc' }) {
+export function renderMovieList({ filterText='', genres=[], watchers=[], sort='title-asc' }) {
   const listEl = qs('#movieList');
   const emptyState = qs('#emptyState');
   const tpl = qs('#movieItemTemplate');
@@ -24,6 +24,15 @@ export function renderMovieList({ filterText='', genres=[], sort='title-asc' }) 
       return genres.every(selectedGenre => 
         movieGenres.some(movieGenre => movieGenre.toLowerCase() === selectedGenre.toLowerCase())
       );
+    });
+  }
+  if (watchers.length > 0) {
+    movies = movies.filter(m => {
+      // Get latest session watchers (if any), otherwise use movie watchers
+      const latestSession = getLatestSessionByMovieId(m.id);
+      const movieWatchers = latestSession ? latestSession.watcherIds : (m.watcherIds || []);
+      // AND logic: movie must have ALL selected watchers
+      return watchers.every(selectedWatcher => movieWatchers.includes(selectedWatcher));
     });
   }
 
@@ -129,6 +138,40 @@ export function populateGenreFilter() {
   const genres = Array.from(allGenres).sort();
   dropdown.innerHTML = genres.map(g => 
     `<div class="multiselect-option" data-genre="${g}">${g}</div>`
+  ).join('');
+}
+
+export function populateWatcherFilter() {
+  const container = qs('#filterWatcher');
+  const dropdown = container.querySelector('.multiselect-dropdown');
+  const watchers = getWatchers();
+  
+  // Sort: favorites first, then alphabetically
+  const favorites = [];
+  const nonFavorites = [];
+  
+  watchers.forEach(w => {
+    if (isFavorite(w.id)) {
+      favorites.push(w);
+    } else {
+      nonFavorites.push(w);
+    }
+  });
+  
+  // Sort each group alphabetically
+  const sortByName = (a, b) => {
+    const nameA = getWatcherFullName(a).toLowerCase();
+    const nameB = getWatcherFullName(b).toLowerCase();
+    return nameA.localeCompare(nameB);
+  };
+  
+  favorites.sort(sortByName);
+  nonFavorites.sort(sortByName);
+  
+  const sortedWatchers = [...favorites, ...nonFavorites];
+  
+  dropdown.innerHTML = sortedWatchers.map(w => 
+    `<div class="multiselect-option" data-watcher-id="${w.id}">${getWatcherFullName(w)}</div>`
   ).join('');
 }
 

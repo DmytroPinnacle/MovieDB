@@ -8,7 +8,7 @@ import { createSession } from './session-models.js';
 import { initializeSeedData } from './DataSeed/initializer.js';
 import { GenreDropdown } from './genre-dropdown.js';
 import { 
-  renderMovieList, populateGenreFilter, resetForm, showErrors, 
+  renderMovieList, populateGenreFilter, populateWatcherFilter, resetForm, showErrors, 
   renderWatcherList, fillWatcherForm, resetWatcherForm, showWatcherModal, hideWatcherModal,
   qs 
 } from './ui.js';
@@ -17,6 +17,7 @@ import {
 const viewState = {
   filterText: '',
   genres: [],
+  watchers: [],
   sort: 'title-asc'
 };
 
@@ -38,6 +39,7 @@ function init() {
   });
   
   populateGenreFilter();
+  populateWatcherFilter();
   renderMovieList(viewState);
   wireEvents();
 }
@@ -90,6 +92,43 @@ function wireEvents() {
     }
   });
   
+  // Multi-select watcher filter events
+  const watcherMultiselect = qs('#filterWatcher');
+  const watcherSelectedDisplay = watcherMultiselect.querySelector('.multiselect-selected');
+  const watcherDropdown = watcherMultiselect.querySelector('.multiselect-dropdown');
+  
+  watcherSelectedDisplay.addEventListener('click', () => {
+    watcherDropdown.classList.toggle('hidden');
+  });
+  
+  watcherSelectedDisplay.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      watcherDropdown.classList.toggle('hidden');
+    }
+  });
+  
+  watcherDropdown.addEventListener('click', (e) => {
+    if (e.target.classList.contains('multiselect-option')) {
+      const watcherId = e.target.dataset.watcherId;
+      if (viewState.watchers.includes(watcherId)) {
+        viewState.watchers = viewState.watchers.filter(w => w !== watcherId);
+        e.target.classList.remove('selected');
+      } else {
+        viewState.watchers.push(watcherId);
+        e.target.classList.add('selected');
+      }
+      updateWatcherDisplay();
+      renderMovieList(viewState);
+    }
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (!watcherMultiselect.contains(e.target)) {
+      watcherDropdown.classList.add('hidden');
+    }
+  });
+  
   sortSelect.addEventListener('change', () => {
     viewState.sort = sortSelect.value;
     renderMovieList(viewState);
@@ -108,6 +147,30 @@ function wireEvents() {
         selectedDisplay.setAttribute('title', viewState.genres.join(', '));
       } else {
         selectedDisplay.removeAttribute('title');
+      }
+    }
+  }
+  
+  function updateWatcherDisplay() {
+    const watcherNames = viewState.watchers.map(id => {
+      const watcher = getWatchers().find(w => w.id === id);
+      if (!watcher) return null;
+      // Format as 'FirstName L.' if lastName exists, otherwise just 'FirstName'
+      if (watcher.lastName && watcher.lastName.trim()) {
+        return `${watcher.firstName} ${watcher.lastName.charAt(0)}.`;
+      }
+      return watcher.firstName;
+    }).filter(Boolean);
+    
+    if (watcherNames.length === 0) {
+      watcherSelectedDisplay.textContent = 'All Watchers';
+      watcherSelectedDisplay.removeAttribute('title');
+    } else {
+      watcherSelectedDisplay.textContent = watcherNames.join(', ');
+      if (watcherNames.length > 2) {
+        watcherSelectedDisplay.setAttribute('title', watcherNames.join(', '));
+      } else {
+        watcherSelectedDisplay.removeAttribute('title');
       }
     }
   }
@@ -185,6 +248,7 @@ function onSubmitForm(e) {
   // Reset genre dropdown
   genreDropdown.setSelectedGenres([]);
   populateGenreFilter();
+  populateWatcherFilter();
   renderMovieList(viewState);
   qs('#title').focus();
 }
@@ -210,6 +274,7 @@ function onSubmitWatcherForm(e) {
   }
   resetWatcherForm();
   renderWatcherList();
+  populateWatcherFilter();
   renderMovieList(viewState); // Refresh in case watcher names are shown
   qs('#watcherFirstName').focus();
 }

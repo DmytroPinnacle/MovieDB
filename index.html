@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MovieDB</title>
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/foldable-panel.css" />
 </head>
 <body>
   <header class="app-header">
@@ -14,9 +15,13 @@
       <a href="watchers.html" class="nav-link">👥 Watchers</a>
     </nav>
   </header>
-  <main class="layout">
-    <section class="panel" aria-labelledby="formTitle">
-      <h2 id="formTitle">Add Movie</h2>
+  <main class="layout" id="mainLayout">
+    <section id="addMoviePanel" class="panel folded" aria-labelledby="formTitle">
+      <div class="panel-header">
+        <h2 id="formTitle">Add Movie</h2>
+        <button id="togglePanelBtn" class="icon-btn" aria-label="Expand panel">←</button>
+      </div>
+      <div id="panelContent">
       <form id="movieForm" novalidate>
         <input type="hidden" id="movieId" />
         <div class="field">
@@ -67,6 +72,10 @@
           <button type="reset" id="resetBtn">Reset</button>
         </div>
       </form>
+      </div>
+      <div id="verticalTab" class="vertical-tab">
+        <span>Add Movie</span>
+      </div>
     </section>
     <section class="panel" aria-labelledby="listTitle">
       <h2 id="listTitle">Movies</h2>
@@ -157,5 +166,6 @@
   <footer class="app-footer">Movie DB demo • Data stored locally in your browser</footer>
   <!-- Use a single ES module entrypoint; it will import other modules -->
   <script type="module" src="js/app.js"></script>
+  <script src="js/panel-toggle.js"></script>
 </body>
 </html>

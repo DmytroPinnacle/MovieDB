@@ -63,7 +63,7 @@ a.small.secondary:hover {
 }
 .hidden { display:none !important; }
 
-.layout { flex:1; display:grid; gap:1.2rem; padding:1rem 1.2rem 2rem; grid-template-columns: 340px 1fr; align-items:start; }
+.layout { flex:1; display:grid; gap:1.2rem; padding:1rem 1.2rem 2rem; grid-template-columns: min-content 1fr; align-items:start; }
 @media (max-width: 900px){ .layout { grid-template-columns:1fr; } }
 
 .panel { background:var(--panel); padding:1rem 1.1rem 1.4rem; border:1px solid #334155; border-radius: var(--radius); box-shadow:0 2px 4px #00000040; }

@@ -1,0 +1,84 @@
+/* Foldable Panel Styles */
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  min-width: 300px; /* Prevent header collapse during transition */
+}
+
+.panel-header h2 {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.icon-btn {
+  background: transparent;
+  color: var(--muted);
+  padding: 0.25rem 0.5rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  transition: color 0.2s, background 0.2s;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  background: #334155;
+}
+
+/* Panel Transition & Sizing */
+#addMoviePanel {
+  width: 340px;
+  transition: width 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+  position: relative;
+  /* Ensure content doesn't reflow weirdly during transition */
+  box-sizing: border-box;
+}
+
+#panelContent {
+  width: 310px; /* Fixed width for content to prevent reflow during panel shrink */
+}
+
+/* Folded State */
+/* We don't need to change grid-template-columns on .layout because we use min-content */
+
+#addMoviePanel.folded {
+  width: 32px; /* Narrower fixed size */
+  padding: 0;
+  cursor: pointer;
+  background: var(--panel);
+}
+
+#addMoviePanel.folded .panel-header,
+#addMoviePanel.folded #panelContent {
+  display: none;
+}
+
+#addMoviePanel.folded .vertical-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Height should fit content + padding, not 100% of parent if parent is tall */
+  height: auto; 
+  min-height: 120px;
+  width: 100%;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  padding: 1rem 0;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+#addMoviePanel.folded:hover .vertical-tab {
+  color: var(--text);
+  background: #334155;
+}
+
+.vertical-tab.hidden {
+  display: none;
+}

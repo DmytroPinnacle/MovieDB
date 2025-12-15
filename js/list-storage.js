@@ -8,6 +8,14 @@ export function addList(list) {
   return listRepository.add(list);
 }
 
+export function updateList(id, list) {
+  return listRepository.update(id, list);
+}
+
+export function deleteList(id) {
+  return listRepository.delete(id);
+}
+
 export function addMovieToList(listId, movieId) {
   return listRepository.addMovieToList(listId, movieId);
 }

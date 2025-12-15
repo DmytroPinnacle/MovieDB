@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Lists - MovieDB</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .lists-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .list-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+    }
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .list-name {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding-right: 2rem;
+    }
+    .list-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .list-movies-preview {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-top: 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .list-menu-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .list-menu-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+    .list-context-menu {
+      position: absolute;
+      top: 2rem;
+      right: 0.5rem;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 10;
+      min-width: 120px;
+      padding: 0.25rem;
+    }
+    .list-context-menu button {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .list-context-menu button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .list-context-menu button.danger {
+      color: var(--danger);
+      background: transparent; /* Ensure background is transparent by default */
+    }
+    .list-context-menu button.danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+    .controls-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .filter-input {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 0.55rem 0.7rem;
+      border-radius: var(--radius);
+      color: var(--text);
+      min-width: 200px;
+      flex: 1; /* Make it same size as others */
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <h1>🎬 MovieDB</h1>
+    <nav class="header-nav">
+      <a href="index.html" class="nav-link">🎬 Movies</a>
+      <a href="lists.html" class="nav-link active">📋 My Lists</a>
+      <a href="watchers.html" class="nav-link">👥 Watchers</a>
+    </nav>
+  </header>
+  <main class="layout full-width">
+    <section class="panel" style="width: 100%;">
+      <div class="panel-header" style="margin-bottom: 1rem;">
+        <h2>My Lists</h2>
+        <button id="addListBtn" class="primary small">+ New List</button>
+      </div>
+      
+      <div class="controls-row">
+        <input id="searchMovie" class="filter-input" placeholder="Filter by movie name..." />
+        
+        <div id="filterGenre" class="genre-multiselect" aria-label="Filter by genre">
+          <div class="multiselect-selected" tabindex="0">All Genres</div>
+          <div class="multiselect-dropdown hidden"></div>
+        </div>
+        
+        <div id="filterWatcher" class="watcher-multiselect" aria-label="Filter by watcher">
+          <div class="multiselect-selected" tabindex="0">All Watchers</div>
+          <div class="multiselect-dropdown hidden"></div>
+        </div>
+      </div>
+
+      <div id="listsGrid" class="lists-grid">
+        <!-- Lists will be rendered here -->
+      </div>
+      <p id="emptyState" class="empty hidden">No lists found matching your criteria.</p>
+    </section>
+  </main>
+
+  <!-- Create List Modal -->
+  <div id="createListModal" class="modal hidden">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="modalTitle">Create New List</h2>
+        <button type="button" class="modal-close" aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <form id="createListForm">
+          <input type="hidden" id="listEditId" name="listEditId" />
+          <div class="field">
+            <label for="newListName">List Name</label>
+            <input id="newListName" name="name" required placeholder="e.g., Favorites, To Watch" />
+            <small class="error" id="listNameError"></small>
+          </div>
+          <div class="actions" style="margin-top: 1rem;">
+            <button type="submit" class="primary" id="saveListBtn">Create List</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <template id="listCardTemplate">
+    <div class="list-card" data-id="">
+      <div class="list-header">
+        <div>
+          <h3 class="list-name"></h3>
+          <div class="list-meta"></div>
+        </div>
+        <button class="list-menu-btn" aria-label="List options">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        </button>
+      </div>
+      <div class="list-movies-preview"></div>
+      <div class="list-context-menu hidden">
+        <button class="rename-list-btn">Rename</button>
+        <button class="delete-list-btn danger">Delete</button>
+      </div>
+    </div>
+  </template>
+
+  <script type="module" src="js/lists-app.js"></script>
+</body>
+</html>

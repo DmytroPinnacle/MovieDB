@@ -168,6 +168,12 @@ function wireEvents() {
     if (!listMultiselect.contains(e.target)) {
       listDropdown.classList.add('hidden');
     }
+    // Close movie context menus when clicking outside
+    if (!e.target.closest('.movie-context-menu') && !e.target.closest('.movie-menu-btn')) {
+      document.querySelectorAll('.movie-context-menu').forEach(menu => {
+        menu.classList.add('hidden');
+      });
+    }
   });
   
   

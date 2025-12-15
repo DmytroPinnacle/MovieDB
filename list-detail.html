@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>List Details - MovieDB</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #334155;
+    }
+    .detail-header h2 { margin: 0; font-size: 1.5rem; }
+    
+    .controls-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .add-movie-container {
+      position: relative;
+      flex: 1;
+      min-width: 300px;
+    }
+    
+    .autocomplete-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: var(--radius);
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .autocomplete-item {
+      padding: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+    }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background: #334155; }
+    .autocomplete-poster {
+      width: 30px;
+      height: 45px;
+      object-fit: cover;
+      background: #0f172a;
+      border-radius: 2px;
+    }
+    
+    .movie-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .movie-table th {
+      text-align: left;
+      padding: 0.75rem;
+      border-bottom: 1px solid #334155;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .movie-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #1e293b;
+      vertical-align: middle;
+    }
+    .movie-table tr:last-child td { border-bottom: none; }
+    .movie-table tr:hover { background: rgba(255,255,255,0.02); }
+    
+    .col-poster { width: 60px; }
+    .col-actions { width: 50px; text-align: right; }
+    
+    .table-poster {
+      width: 40px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: #1e293b;
+    }
+    
+    .rating-badge {
+      display: inline-block;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: #334155;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .rating-badge.high { background: #059669; color: white; }
+    .rating-badge.med { background: #d97706; color: white; }
+    .rating-badge.low { background: #dc2626; color: white; }
+    
+    .sort-select {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: var(--text);
+      padding: 0.55rem;
+      border-radius: var(--radius);
+      min-width: 150px;
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <h1>🎬 MovieDB</h1>
+    <nav class="header-nav">
+      <a href="index.html" class="nav-link">🎬 Movies</a>
+      <a href="lists.html" class="nav-link active">📋 My Lists</a>
+      <a href="watchers.html" class="nav-link">👥 Watchers</a>
+    </nav>
+  </header>
+  
+  <main class="layout full-width">
+    <section class="panel" style="width: 100%;">
+      <div class="detail-header">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <a href="lists.html" class="small secondary">← Back</a>
+          <h2 id="listName">Loading...</h2>
+        </div>
+        <div class="list-meta" id="listMeta"></div>
+      </div>
+      
+      <div class="controls-bar">
+        <div class="add-movie-container">
+          <input id="addMovieInput" type="text" placeholder="Search to add movie..." style="width: 100%; padding: 0.6rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white;" />
+          <div id="autocompleteDropdown" class="autocomplete-dropdown hidden"></div>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <label for="sortSelect" style="font-size: 0.9rem; color: var(--muted);">Sort by:</label>
+          <select id="sortSelect" class="sort-select">
+            <option value="watched-desc">Watch Date ↓</option>
+            <option value="watched-asc">Watch Date ↑</option>
+            <option value="title-asc">Title (A-Z)</option>
+            <option value="title-desc">Title (Z-A)</option>
+            <option value="year-desc">Year ↓</option>
+            <option value="year-asc">Year ↑</option>
+            <option value="rating-desc">Rating ↓</option>
+            <option value="rating-asc">Rating ↑</option>
+            <option value="avg-rating-desc">Avg Watcher Rating ↓</option>
+            <option value="avg-rating-asc">Avg Watcher Rating ↑</option>
+            <option value="watchers-count-desc">Num. Watchers ↓</option>
+            <option value="watchers-count-asc">Num. Watchers ↑</option>
+            <option value="watched-times-desc">Watched Times ↓</option>
+            <option value="watched-times-asc">Watched Times ↑</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="movie-table">
+          <thead>
+            <tr>
+              <th class="col-poster"></th>
+              <th>Title</th>
+              <th>Year</th>
+              <th>Rating</th>
+              <th>Avg Watcher Rating</th>
+              <th>Last Watched</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody id="movieTableBody">
+            <!-- Rows will be populated here -->
+          </tbody>
+        </table>
+      </div>
+      
+      <p id="emptyState" class="empty hidden">No movies in this list yet.</p>
+    </section>
+  </main>
+
+  <script type="module" src="js/list-detail-app.js"></script>
+</body>
+</html>

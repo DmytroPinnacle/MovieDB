@@ -111,14 +111,30 @@ export function renderMovieList({ filterText='', genres=[], watchers=[], lists=[
       watchersSection.classList.add('hidden');
     }
     
-    // Menu button
+    // Menu button and context menu
     const menuBtn = node.querySelector('.movie-menu-btn');
-    if (menuBtn) {
+    const contextMenu = node.querySelector('.movie-context-menu');
+    
+    if (menuBtn && contextMenu) {
       menuBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        openListModal(m.id);
+        // Close other open menus
+        document.querySelectorAll('.movie-context-menu').forEach(el => {
+          if (el !== contextMenu) el.classList.add('hidden');
+        });
+        contextMenu.classList.toggle('hidden');
       });
+      
+      // Wire up context menu options
+      const addToListBtn = contextMenu.querySelector('.add-to-list-btn');
+      if (addToListBtn) {
+        addToListBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          contextMenu.classList.add('hidden');
+          openListModal(m.id);
+        });
+      }
     }
 
     // Handle IMDB link

@@ -89,6 +89,10 @@
           <div class="multiselect-selected" tabindex="0">All Watchers</div>
           <div class="multiselect-dropdown hidden"></div>
         </div>
+        <div id="filterList" class="list-multiselect" aria-label="Filter by list">
+          <div class="multiselect-selected" tabindex="0">All Lists</div>
+          <div class="multiselect-dropdown hidden"></div>
+        </div>
         <select id="sortSelect" aria-label="Sort movies">
           <option value="title-asc">Title A→Z</option>
           <option value="title-desc">Title Z→A</option>
@@ -116,6 +120,9 @@
           <a class="small kinopoisk-link hidden" target="_blank" rel="noopener" aria-label="View on Kinopoisk">Kinopoisk</a>
         </div>
       </div>
+      <button class="movie-menu-btn" aria-label="Movie options">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+      </button>
     </li>
   </template>
   
@@ -162,6 +169,31 @@
       </div>
     </li>
   </template>
+
+  <!-- List Management Modal -->
+  <div id="listModal" class="modal hidden">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2>Add to List</h2>
+        <button type="button" class="modal-close" aria-label="Close">&times;</button>
+      </header>
+      <div class="modal-body">
+        <div class="list-actions">
+          <button id="createNewListBtn" class="secondary small">+ Create New List</button>
+        </div>
+        <form id="createListForm" class="hidden field-group" style="margin-top: 1rem;">
+          <div class="field" style="display: flex; gap: 0.5rem;">
+            <input id="newListName" placeholder="List Name" style="flex: 1;" />
+            <button type="submit" class="primary small">Create</button>
+          </div>
+        </form>
+        <hr />
+        <ul id="availableLists" class="list-selection">
+          <!-- Lists will be populated here -->
+        </ul>
+      </div>
+    </div>
+  </div>
   
   <footer class="app-footer">Movie DB demo • Data stored locally in your browser</footer>
   <!-- Use a single ES module entrypoint; it will import other modules -->

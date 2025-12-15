@@ -7,4 +7,5 @@ export { BaseRepository } from './BaseRepository.js';
 export { movieRepository } from './MovieRepository.js';
 export { watcherRepository } from './WatcherRepository.js';
 export { sessionRepository } from './SessionRepository.js';
+export { listRepository } from './ListRepository.js';
 export { dataManager, DataManager } from './DataManager.js';

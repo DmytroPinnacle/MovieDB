@@ -75,7 +75,7 @@ a.small.secondary:hover {
 .movie-controls input:focus, .movie-controls select:focus, form input:focus, form textarea:focus { outline: var(--focus); }
 
 /* Multi-select genre filter */
-.genre-multiselect { position:relative; min-width:150px; flex:1; }
+.genre-multiselect, .watcher-multiselect, .list-multiselect { position:relative; min-width:150px; flex:1; }
 .multiselect-selected { padding:.5rem .65rem; background:#0f172a; color:var(--text); border:1px solid #334155; border-radius:var(--radius); cursor:pointer; user-select:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; height:38px; line-height:1.4; }
 .multiselect-selected:hover { border-color:#475569; }
 .multiselect-selected:focus { outline: var(--focus); }
@@ -87,7 +87,7 @@ a.small.secondary:hover {
 .multiselect-option.selected::before { content:'✓ '; margin-right:.3rem; }
 
 /* Watcher multi-select */
-.watcher-multiselect { position:relative; min-width:150px; flex:1; }
+/* .watcher-multiselect { position:relative; min-width:150px; flex:1; } - merged above */
 
 form { display:flex; flex-direction:column; gap:.85rem; }
 .field { display:flex; flex-direction:column; gap:.35rem; }
@@ -423,3 +423,72 @@ form { display:flex; flex-direction:column; gap:.85rem; }
   padding: 1rem;
   text-align: center;
 }
+
+/* Movie Menu Button */
+.movie-menu-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(15, 23, 42, 0.8);
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  opacity: 0; /* Hidden by default */
+}
+
+.movie-item:hover .movie-menu-btn,
+.movie-menu-btn:focus {
+  opacity: 1;
+}
+
+.movie-menu-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* List Selection in Modal */
+.list-selection {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.list-selection-item {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.list-selection-item:hover {
+  background: #1e293b;
+}
+
+.list-selection-item.selected {
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.list-check {
+  color: var(--primary);
+  opacity: 0;
+}
+
+.list-selection-item.selected .list-check {
+  opacity: 1;
+}
+

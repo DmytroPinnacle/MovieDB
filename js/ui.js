@@ -3,11 +3,13 @@ import { getMovies } from './storage.js';
 import { getWatchers, getWatcherById, isFavorite } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
 import { getLatestSessionByMovieId } from './session-storage.js';
+import { getLists, addList, addMovieToList, removeMovieFromList } from './list-storage.js';
+import { createList } from './list-models.js';
 
 export function qs(sel, parent=document){ return parent.querySelector(sel); }
 export function qsa(sel, parent=document){ return Array.from(parent.querySelectorAll(sel)); }
 
-export function renderMovieList({ filterText='', genres=[], watchers=[], sort='title-asc' }) {
+export function renderMovieList({ filterText='', genres=[], watchers=[], lists=[], sort='title-asc' }) {
   const listEl = qs('#movieList');
   const emptyState = qs('#emptyState');
   const tpl = qs('#movieItemTemplate');
@@ -33,6 +35,16 @@ export function renderMovieList({ filterText='', genres=[], watchers=[], sort='t
       const movieWatchers = latestSession ? latestSession.watcherIds : (m.watcherIds || []);
       // AND logic: movie must have ALL selected watchers
       return watchers.every(selectedWatcher => movieWatchers.includes(selectedWatcher));
+    });
+  }
+  if (lists.length > 0) {
+    const allLists = getLists();
+    movies = movies.filter(m => {
+      // AND logic: movie must be in ALL selected lists
+      return lists.every(selectedListId => {
+        const list = allLists.find(l => l.id === selectedListId);
+        return list && list.movieIds.includes(m.id);
+      });
     });
   }
 
@@ -99,6 +111,16 @@ export function renderMovieList({ filterText='', genres=[], watchers=[], sort='t
       watchersSection.classList.add('hidden');
     }
     
+    // Menu button
+    const menuBtn = node.querySelector('.movie-menu-btn');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openListModal(m.id);
+      });
+    }
+
     // Handle IMDB link
     const imdbLink = node.querySelector('.imdb-link');
     if (m.imdbId && m.imdbId.trim()) {
@@ -175,6 +197,16 @@ export function populateWatcherFilter() {
   ).join('');
 }
 
+export function populateListFilter() {
+  const container = qs('#filterList');
+  const dropdown = container.querySelector('.multiselect-dropdown');
+  const lists = getLists();
+  
+  dropdown.innerHTML = lists.map(l => 
+    `<div class="multiselect-option" data-list-id="${l.id}">${l.name}</div>`
+  ).join('');
+}
+
 export function resetForm() {
   const form = qs('#movieForm');
   form.reset();
@@ -246,3 +278,94 @@ export function hideWatcherModal() {
   resetWatcherForm();
   showErrors({});
 }
+
+// --- List Management ---
+
+let currentMovieIdForList = null;
+
+function openListModal(movieId) {
+  currentMovieIdForList = movieId;
+  const modal = qs('#listModal');
+  renderListSelection(movieId);
+  modal.classList.remove('hidden');
+}
+
+function renderListSelection(movieId) {
+  const listContainer = qs('#availableLists');
+  listContainer.innerHTML = '';
+  const lists = getLists();
+
+  if (lists.length === 0) {
+    listContainer.innerHTML = '<li class="watcher-dropdown-empty">No lists created yet.</li>';
+    return;
+  }
+
+  lists.forEach(list => {
+    const isSelected = list.movieIds.includes(movieId);
+    const li = document.createElement('li');
+    li.className = `list-selection-item ${isSelected ? 'selected' : ''}`;
+    li.innerHTML = `
+      <span>${list.name}</span>
+      <span class="list-check">✓</span>
+    `;
+    li.addEventListener('click', () => toggleMovieInList(list.id, movieId));
+    listContainer.appendChild(li);
+  });
+}
+
+function toggleMovieInList(listId, movieId) {
+  const lists = getLists();
+  const list = lists.find(l => l.id === listId);
+  if (!list) return;
+
+  if (list.movieIds.includes(movieId)) {
+    removeMovieFromList(listId, movieId);
+  } else {
+    addMovieToList(listId, movieId);
+  }
+  renderListSelection(movieId);
+}
+
+export function wireListModalEvents() {
+  const modal = qs('#listModal');
+  const closeBtn = modal.querySelector('.modal-close');
+  const createBtn = qs('#createNewListBtn');
+  const createForm = qs('#createListForm');
+  const nameInput = qs('#newListName');
+
+  closeBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    currentMovieIdForList = null;
+  });
+
+  // Close on click outside
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      currentMovieIdForList = null;
+    }
+  });
+
+  createBtn.addEventListener('click', () => {
+    createForm.classList.toggle('hidden');
+    if (!createForm.classList.contains('hidden')) {
+      nameInput.focus();
+    }
+  });
+
+  createForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = nameInput.value.trim();
+    if (name) {
+      const newList = createList({ name });
+      addList(newList);
+      nameInput.value = '';
+      createForm.classList.add('hidden');
+      populateListFilter(); // Refresh the filter dropdown
+      if (currentMovieIdForList) {
+        renderListSelection(currentMovieIdForList);
+      }
+    }
+  });
+}
+

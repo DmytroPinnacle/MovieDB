@@ -5,11 +5,13 @@ import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatch
 import { createWatcher, validateWatcherFields, updateWatcher as mergeWatcher, getWatcherFullName } from './watcher-models.js';
 import { loadSessions, addSession, getSessions } from './session-storage.js';
 import { createSession } from './session-models.js';
+import { getLists } from './list-storage.js';
 import { initializeSeedData } from './DataSeed/initializer.js';
 import { GenreDropdown } from './genre-dropdown.js';
 import { 
-  renderMovieList, populateGenreFilter, populateWatcherFilter, resetForm, showErrors, 
+  renderMovieList, populateGenreFilter, populateWatcherFilter, populateListFilter, resetForm, showErrors, 
   renderWatcherList, fillWatcherForm, resetWatcherForm, showWatcherModal, hideWatcherModal,
+  wireListModalEvents,
   qs 
 } from './ui.js';
 
@@ -18,6 +20,7 @@ const viewState = {
   filterText: '',
   genres: [],
   watchers: [],
+  lists: [],
   sort: 'title-asc'
 };
 
@@ -40,8 +43,10 @@ function init() {
   
   populateGenreFilter();
   populateWatcherFilter();
+  populateListFilter();
   renderMovieList(viewState);
   wireEvents();
+  wireListModalEvents();
 }
 
 function wireEvents() {
@@ -128,6 +133,43 @@ function wireEvents() {
       watcherDropdown.classList.add('hidden');
     }
   });
+  // Multi-select list filter events
+  const listMultiselect = qs('#filterList');
+  const listSelectedDisplay = listMultiselect.querySelector('.multiselect-selected');
+  const listDropdown = listMultiselect.querySelector('.multiselect-dropdown');
+  
+  listSelectedDisplay.addEventListener('click', () => {
+    listDropdown.classList.toggle('hidden');
+  });
+  
+  listSelectedDisplay.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      listDropdown.classList.toggle('hidden');
+    }
+  });
+  
+  listDropdown.addEventListener('click', (e) => {
+    if (e.target.classList.contains('multiselect-option')) {
+      const listId = e.target.dataset.listId;
+      if (viewState.lists.includes(listId)) {
+        viewState.lists = viewState.lists.filter(l => l !== listId);
+        e.target.classList.remove('selected');
+      } else {
+        viewState.lists.push(listId);
+        e.target.classList.add('selected');
+      }
+      updateListDisplay();
+      renderMovieList(viewState);
+    }
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (!listMultiselect.contains(e.target)) {
+      listDropdown.classList.add('hidden');
+    }
+  });
+  
   
   sortSelect.addEventListener('change', () => {
     viewState.sort = sortSelect.value;
@@ -137,6 +179,25 @@ function wireEvents() {
   form.addEventListener('submit', onSubmitForm);
   form.addEventListener('reset', () => setTimeout(()=> showErrors({}), 0));
   
+  function updateListDisplay() {
+    const listNames = viewState.lists.map(id => {
+      const list = getLists().find(l => l.id === id);
+      return list ? list.name : null;
+    }).filter(Boolean);
+    
+    if (listNames.length === 0) {
+      listSelectedDisplay.textContent = 'All Lists';
+      listSelectedDisplay.removeAttribute('title');
+    } else {
+      listSelectedDisplay.textContent = listNames.join(', ');
+      if (listNames.length > 2) {
+        listSelectedDisplay.setAttribute('title', listNames.join(', '));
+      } else {
+        listSelectedDisplay.removeAttribute('title');
+      }
+    }
+  }
+
   function updateGenreDisplay() {
     if (viewState.genres.length === 0) {
       selectedDisplay.textContent = 'All Genres';

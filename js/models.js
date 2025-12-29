@@ -27,6 +27,13 @@ export function createMovie(data) {
       ? data.watcherIds.filter(id => id && id.trim())
       : data.watcherIds.split(',').map(id => id.trim()).filter(Boolean);
   }
+  // Handle directorIds
+  let directorIds = [];
+  if (data.directorIds) {
+    directorIds = Array.isArray(data.directorIds) 
+      ? data.directorIds.filter(id => id && id.trim())
+      : data.directorIds.split(',').map(id => id.trim()).filter(Boolean);
+  }
   // Handle genres - could be array from FormData.getAll() or comma-separated string
   let genres = [];
   if (data.genres) {
@@ -48,6 +55,7 @@ export function createMovie(data) {
     imdbId: (data.imdbId || '').trim(),
     kinopoiskId: (data.kinopoiskId || '').trim(),
     watcherIds: watcherIds,
+    directorIds: directorIds,
     createdAt: now,
     updatedAt: now
   };
@@ -94,6 +102,13 @@ export function updateMovie(original, updates) {
       ? updates.watcherIds.filter(id => id && id.trim())
       : updates.watcherIds.split(',').map(id => id.trim()).filter(Boolean);
   }
+  // Handle directorIds
+  let directorIds = [];
+  if (updates.directorIds) {
+    directorIds = Array.isArray(updates.directorIds) 
+      ? updates.directorIds.filter(id => id && id.trim())
+      : updates.directorIds.split(',').map(id => id.trim()).filter(Boolean);
+  }
   // Handle genres - could be array from FormData.getAll() or comma-separated string
   let genres = [];
   if (updates.genres) {
@@ -115,6 +130,41 @@ export function updateMovie(original, updates) {
     imdbId: (updates.imdbId || '').trim(),
     kinopoiskId: (updates.kinopoiskId || '').trim(),
     watcherIds: watcherIds,
+    directorIds: directorIds,
     updatedAt: Date.now()
   };
+}
+
+/** Director object shape
+ *  {
+ *    id: string,
+ *    name: string,
+ *    movieIds: string[],
+ *    createdAt: number,
+ *    updatedAt: number
+ *  }
+ */
+export function createDirector(data) {
+  const now = Date.now();
+  let movieIds = [];
+  if (data.movieIds) {
+    movieIds = Array.isArray(data.movieIds)
+      ? data.movieIds.filter(id => id && id.trim())
+      : data.movieIds.split(',').map(id => id.trim()).filter(Boolean);
+  }
+
+  return {
+    id: crypto.randomUUID ? crypto.randomUUID() : 'd_' + Math.random().toString(36).slice(2, 11),
+    name: data.name.trim(),
+    movieIds: movieIds,
+    createdAt: now,
+    updatedAt: now
+  };
+}
+
+export function validateDirectorFields(fields) {
+  const errors = {};
+  if (!fields.name || !fields.name.trim()) errors.name = 'Name is required';
+  if (fields.name && fields.name.trim().length > 100) errors.name = 'Max 100 chars';
+  return errors;
 }

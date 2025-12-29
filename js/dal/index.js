@@ -5,6 +5,7 @@
 
 export { BaseRepository } from './BaseRepository.js';
 export { movieRepository } from './MovieRepository.js';
+export { directorRepository } from './DirectorRepository.js';
 export { watcherRepository } from './WatcherRepository.js';
 export { sessionRepository } from './SessionRepository.js';
 export { listRepository } from './ListRepository.js';

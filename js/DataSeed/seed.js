@@ -2,7 +2,7 @@
 // Poster URLs from IMDB CDN - these are publicly accessible thumbnails
 // Ratings here are approximate public consensus (0-10 scale) for demonstration only.
 // Genres can include multiple categories.
-// Format: [title, year, genres (array), rating, imdbId, posterUrl, kinopoiskId]
+// Format: [title, year, genres (array), rating, imdbId, posterUrl, kinopoiskId, directors (array)]
 export const SEED_MOVIES = [
   [
     "The Godfather",
@@ -12,6 +12,7 @@ export const SEED_MOVIES = [
     "tt0068646",
     "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
     "325",
+    ["Francis Ford Coppola"]
   ],
   [
     "The Godfather: Part II",
@@ -20,6 +21,8 @@ export const SEED_MOVIES = [
     9.0,
     "tt0071562",
     "https://m.media-amazon.com/images/M/MV5BMWMwMGQzZTItY2JlNC00OWZiLWIyMDctNDk2ZDQ2YjRjMWQ0XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["Francis Ford Coppola"]
   ],
   [
     "The Dark Knight",
@@ -28,6 +31,8 @@ export const SEED_MOVIES = [
     9.0,
     "tt0468569",
     "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg",
+    "",
+    ["Christopher Nolan"]
   ],
   [
     "The Shawshank Redemption",
@@ -36,6 +41,8 @@ export const SEED_MOVIES = [
     9.3,
     "tt0111161",
     "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
+    "",
+    ["Frank Darabont"]
   ],
   [
     "Pulp Fiction",
@@ -44,6 +51,8 @@ export const SEED_MOVIES = [
     8.9,
     "tt0110912",
     "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["Quentin Tarantino"]
   ],
   [
     "Schindler's List",
@@ -52,6 +61,8 @@ export const SEED_MOVIES = [
     9.0,
     "tt0108052",
     "https://m.media-amazon.com/images/M/MV5BNDE4OTMxMTctNmRhYy00NWE2LTg3YzItYTk3M2UwOTU5Njg4XkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["Steven Spielberg"]
   ],
   [
     "Fight Club",
@@ -60,6 +71,8 @@ export const SEED_MOVIES = [
     8.8,
     "tt0137523",
     "https://m.media-amazon.com/images/M/MV5BNDIzNDU0YzEtYzE5Ni00ZjlkLTk5ZjgtNjM3NWE4YzA3Nzk3XkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg",
+    "",
+    ["David Fincher"]
   ],
   [
     "Inception",
@@ -68,6 +81,8 @@ export const SEED_MOVIES = [
     8.8,
     "tt1375666",
     "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
+    "",
+    ["Christopher Nolan"]
   ],
   [
     "Forrest Gump",
@@ -77,6 +92,7 @@ export const SEED_MOVIES = [
     "tt0109830",
     "https://m.media-amazon.com/images/M/MV5BNWIwODRlZTUtY2U3ZS00Yzg1LWJhNzYtMmZiYmEyNmU1NjMzXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
     "448",
+    ["Robert Zemeckis"]
   ],
   [
     "The Matrix",
@@ -85,6 +101,8 @@ export const SEED_MOVIES = [
     8.7,
     "tt0133093",
     "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["Lana Wachowski", "Lilly Wachowski"]
   ],
   [
     "Goodfellas",
@@ -93,6 +111,8 @@ export const SEED_MOVIES = [
     8.7,
     "tt0099685",
     "https://m.media-amazon.com/images/M/MV5BY2NkZjEzMDgtN2RjYy00YzM1LWI4ZmQtMjIwYjFjNmI3ZGEwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["Martin Scorsese"]
   ],
   [
     "Se7en",
@@ -101,6 +121,8 @@ export const SEED_MOVIES = [
     8.6,
     "tt0114369",
     "https://m.media-amazon.com/images/M/MV5BOTUwODM5MTctZjczMi00OTk4LTg3NWUtNmVhMTAzNTNjYjcyXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["David Fincher"]
   ],
   [
     "The Silence of the Lambs",
@@ -109,6 +131,8 @@ export const SEED_MOVIES = [
     8.6,
     "tt0102926",
     "https://m.media-amazon.com/images/M/MV5BNjNhZTk0ZmEtNjJhMi00YzFlLWE1MmEtYzM1M2ZmMGMwMTU4XkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["Jonathan Demme"]
   ],
   [
     "Saving Private Ryan",
@@ -117,6 +141,8 @@ export const SEED_MOVIES = [
     8.6,
     "tt0120815",
     "https://m.media-amazon.com/images/M/MV5BZjhkMDM4MWItZTVjOC00ZDRhLThmYTAtM2I5NzBmNmNlMzI1XkEyXkFqcGdeQXVyNDYyMDk5MTU@._V1_SX300.jpg",
+    "",
+    ["Steven Spielberg"]
   ],
   [
     "Interstellar",
@@ -125,6 +151,8 @@ export const SEED_MOVIES = [
     8.6,
     "tt0816692",
     "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg",
+    "",
+    ["Christopher Nolan"]
   ],
   [
     "Parasite",
@@ -133,6 +161,8 @@ export const SEED_MOVIES = [
     8.6,
     "tt6751668",
     "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
+    "",
+    ["Bong Joon-ho"]
   ],
   [
     "The Green Mile",
@@ -141,6 +171,8 @@ export const SEED_MOVIES = [
     8.6,
     "tt0120689",
     "https://m.media-amazon.com/images/M/MV5BMTUxMzQyNjA5MF5BMl5BanBnXkFtZTYwOTU2NTY3._V1_SX300.jpg",
+    "",
+    ["Frank Darabont"]
   ],
   [
     "Gladiator",
@@ -149,6 +181,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0172495",
     "https://m.media-amazon.com/images/M/MV5BMDliMmNhNDEtODUyOS00MjNlLTgxODEtN2U3NzIxMGVkZTA1L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["Ridley Scott"]
   ],
   [
     "The Departed",
@@ -157,6 +191,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0407887",
     "https://m.media-amazon.com/images/M/MV5BMTI1MTY2OTIxNV5BMl5BanBnXkFtZTYwNjQ4NjY3._V1_SX300.jpg",
+    "",
+    ["Martin Scorsese"]
   ],
   [
     "Whiplash",
@@ -165,6 +201,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt2582802",
     "https://m.media-amazon.com/images/M/MV5BOTA5NDZlZGUtMjAxOS00YTRkLTkwYmMtYWQ0NWEwZDZiNjEzXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg",
+    "",
+    ["Damien Chazelle"]
   ],
   [
     "The Prestige",
@@ -173,6 +211,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0482571",
     "https://m.media-amazon.com/images/M/MV5BMjA4NDI0MTIxNF5BMl5BanBnXkFtZTYwNTM0MzY2._V1_SX300.jpg",
+    "",
+    ["Christopher Nolan"]
   ],
   [
     "The Lion King",
@@ -181,6 +221,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0110357",
     "https://m.media-amazon.com/images/M/MV5BYTYxNGMyZTYtMjE3MS00MzNjLWFjNmYtMDk3N2FmM2JiM2M1XkEyXkFqcGdeQXVyNjY5NDU4NzI@._V1_SX300.jpg",
+    "",
+    ["Roger Allers", "Rob Minkoff"]
   ],
   [
     "The Usual Suspects",
@@ -189,6 +231,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0114814",
     "https://m.media-amazon.com/images/M/MV5BYTViNjMyNmUtNDFkNC00ZDRlLThmMDUtZDU2YWE4NGI2ZjVmXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["Bryan Singer"]
   ],
   [
     "City of God",
@@ -197,8 +241,10 @@ export const SEED_MOVIES = [
     8.6,
     "tt0317248",
     "https://m.media-amazon.com/images/M/MV5BOTMwYjc5ZmItYTFjZC00ZGQ3LTlkNTMtMjZiNTZlMWQzNzI5XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["Fernando Meirelles", "Kátia Lund"]
   ],
-  ["Léon: The Professional", 1994, "Action", 8.5, "tt0110413", null],
+  ["Léon: The Professional", 1994, "Action", 8.5, "tt0110413", null, "", ["Luc Besson"]],
   [
     "The Pianist",
     2002,
@@ -206,6 +252,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0253474",
     "https://m.media-amazon.com/images/M/MV5BOWRiZDIxZjktMTA1NC00MDQ2LWEzMjUtMTliZmY3NjQ3ODJiXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["Roman Polanski"]
   ],
   [
     "Terminator 2: Judgment Day",
@@ -214,6 +262,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0103064",
     "https://m.media-amazon.com/images/M/MV5BMGU2NzRmZjUtOGUxYS00ZjdjLWEwZWItY2NlM2JhNjkxNTFmXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["James Cameron"]
   ],
   [
     "Back to the Future",
@@ -222,6 +272,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0088763",
     "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
+    "",
+    ["Robert Zemeckis"]
   ],
   [
     "Alien",
@@ -230,6 +282,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0078748",
     "https://m.media-amazon.com/images/M/MV5BOGQzZTBjMjQtOTVmMS00NGE5LWEyYmMtOGQ1ZGZjNmRkYjFhXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg",
+    "",
+    ["Ridley Scott"]
   ],
   [
     "Apocalypse Now",
@@ -238,6 +292,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0078788",
     "https://m.media-amazon.com/images/M/MV5BYmQyNTA1ZGItNjZjMi00NzFlLWEzMWEtNWMwN2Q2MjJhYzEyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg",
+    "",
+    ["Francis Ford Coppola"]
   ],
   [
     "American Beauty",
@@ -246,6 +302,8 @@ export const SEED_MOVIES = [
     8.3,
     "tt0169547",
     "https://m.media-amazon.com/images/M/MV5BNTBmZWJkNjctNDhiNC00MGE2LWEwOTctZTk5OGVhMWMyNmVhXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg",
+    "",
+    ["Sam Mendes"]
   ],
   [
     "Memento",
@@ -254,6 +312,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt0209144",
     "https://m.media-amazon.com/images/M/MV5BZTcyNjk1MjgtOWI3Mi00YzQwLWI5MTktMzY4ZmI2NDAyNzYzXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["Christopher Nolan"]
   ],
   [
     "Braveheart",
@@ -262,6 +322,8 @@ export const SEED_MOVIES = [
     8.3,
     "tt0112573",
     "https://m.media-amazon.com/images/M/MV5BMzkzMmU0YTYtOWM3My00YzBmLWI0YzctOGYyNTkwMWE5MTJkXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["Mel Gibson"]
   ],
   [
     "The Dark Knight Rises",
@@ -270,6 +332,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt1345836",
     "https://m.media-amazon.com/images/M/MV5BMTk4ODQzNDY3Ml5BMl5BanBnXkFtZTcwODA0NTM4Nw@@._V1_SX300.jpg",
+    "",
+    ["Christopher Nolan"]
   ],
   [
     "Django Unchained",
@@ -278,6 +342,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt1853728",
     "https://m.media-amazon.com/images/M/MV5BMjIyNTQ5NjQ1OV5BMl5BanBnXkFtZTcwODg1MDU4OA@@._V1_SX300.jpg",
+    "",
+    ["Quentin Tarantino"]
   ],
   [
     "The Wolf of Wall Street",
@@ -286,6 +352,8 @@ export const SEED_MOVIES = [
     8.2,
     "tt0993846",
     "https://m.media-amazon.com/images/M/MV5BMjIxMjgxNTk0MF5BMl5BanBnXkFtZTgwNjIyOTg2MDE@._V1_SX300.jpg",
+    "",
+    ["Martin Scorsese"]
   ],
   [
     "The Social Network",
@@ -294,6 +362,8 @@ export const SEED_MOVIES = [
     7.8,
     "tt1285016",
     "https://m.media-amazon.com/images/M/MV5BOGUyZDUxZjEtMmIzMC00MzlmLTg4MGItZWJmMzBhZjE0Mjc1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg",
+    "",
+    ["David Fincher"]
   ],
   [
     "The Avengers",
@@ -302,6 +372,8 @@ export const SEED_MOVIES = [
     8.0,
     "tt0848228",
     "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg",
+    "",
+    ["Joss Whedon"]
   ],
   [
     "Avengers: Infinity War",
@@ -310,6 +382,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt4154756",
     "https://m.media-amazon.com/images/M/MV5BMjMxNjY2MDU1OV5BMl5BanBnXkFtZTgwNzY1MTUwNTM@._V1_SX300.jpg",
+    "",
+    ["Anthony Russo", "Joe Russo"]
   ],
   [
     "Avengers: Endgame",
@@ -318,6 +392,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt4154796",
     "https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_SX300.jpg",
+    "",
+    ["Anthony Russo", "Joe Russo"]
   ],
   [
     "Iron Man",
@@ -326,6 +402,8 @@ export const SEED_MOVIES = [
     7.9,
     "tt0371746",
     "https://m.media-amazon.com/images/M/MV5BMTczNTI2ODUwOF5BMl5BanBnXkFtZTcwMTU0NTIzMw@@._V1_SX300.jpg",
+    "",
+    ["Jon Favreau"]
   ],
   [
     "Guardians of the Galaxy",
@@ -334,6 +412,8 @@ export const SEED_MOVIES = [
     8.0,
     "tt2015381",
     "https://m.media-amazon.com/images/M/MV5BMTAwMjU5OTgxNjZeQTJeQWpwZ15BbWU4MDUxNDYxODEx._V1_SX300.jpg",
+    "",
+    ["James Gunn"]
   ],
   [
     "Blade Runner",
@@ -342,6 +422,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt0083658",
     "https://m.media-amazon.com/images/M/MV5BNzQzMzJhZTEtOWM4NS00MTdhLTg0YjgtMjM4MDRkZjUwZDBlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["Ridley Scott"]
   ],
   [
     "Blade Runner 2049",
@@ -350,6 +432,8 @@ export const SEED_MOVIES = [
     8.0,
     "tt1856101",
     "https://m.media-amazon.com/images/M/MV5BNzA1Njg4NzYxOV5BMl5BanBnXkFtZTgwODk5NjU3MzI@._V1_SX300.jpg",
+    "",
+    ["Denis Villeneuve"]
   ],
   [
     "Mad Max: Fury Road",
@@ -358,6 +442,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt1392190",
     "https://m.media-amazon.com/images/M/MV5BN2EwM2I5OWMtMGQyMi00Zjg1LWJkNTctZTdjYTA4OGUwZjMyXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg",
+    "",
+    ["George Miller"]
   ],
   [
     "Joker",
@@ -366,6 +452,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt7286456",
     "https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SX300.jpg",
+    "",
+    ["Todd Phillips"]
   ],
   [
     "The Truman Show",
@@ -374,6 +462,8 @@ export const SEED_MOVIES = [
     8.2,
     "tt0120382",
     "https://m.media-amazon.com/images/M/MV5BMDIzODcyY2EtMmY2MC00ZWVlLTgwMzAtMjQwOWUyNmJjNTYyXkEyXkFqcGdeQXVyNDk3NzU2MTQ@._V1_SX300.jpg",
+    "",
+    ["Peter Weir"]
   ],
   [
     "A Beautiful Mind",
@@ -382,8 +472,10 @@ export const SEED_MOVIES = [
     8.2,
     "tt0268978",
     "https://m.media-amazon.com/images/M/MV5BMzcwYWFkYzktZjAzNC00OGY1LWI4YTgtNzc5MzVjMDVmNjY0XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
+    "",
+    ["Ron Howard"]
   ],
-  ["The Great Dictator", 1940, "Comedy", 8.4, "tt0032553", null],
+  ["The Great Dictator", 1940, "Comedy", 8.4, "tt0032553", null, "", ["Charlie Chaplin"]],
   [
     "Modern Times",
     1936,
@@ -391,6 +483,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0027977",
     "https://m.media-amazon.com/images/M/MV5BYjJiZjMzYzktNjU0NS00OTkxLWEwYzItYzdhYWJjN2QzMTRlL2ltYWdlL2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["Charlie Chaplin"]
   ],
   [
     "City Lights",
@@ -399,6 +493,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0021749",
     "https://m.media-amazon.com/images/M/MV5BY2I4MmM1N2EtM2YzOS00OWUzLTkzYzctNDc5NDg2N2IyODJmXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["Charlie Chaplin"]
   ],
   [
     "Once Upon a Time in the West",
@@ -407,6 +503,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0064116",
     null,
+    "",
+    ["Sergio Leone"]
   ],
   [
     "Casablanca",
@@ -415,6 +513,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0034583",
     "https://m.media-amazon.com/images/M/MV5BY2IzZGY2YmEtYzljNS00NTM5LTgwMzUtMzM1NjQ4NGI0OTk0XkEyXkFqcGdeQXVyNDYyMDk5MTU@._V1_SX300.jpg",
+    "",
+    ["Michael Curtiz"]
   ],
   [
     "Psycho",
@@ -423,6 +523,8 @@ export const SEED_MOVIES = [
     8.5,
     "tt0054215",
     "https://m.media-amazon.com/images/M/MV5BNTQwNDM1YzItNDAxZC00NWY2LTk0M2UtNDIwNWI5OGUyNWUxXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["Alfred Hitchcock"]
   ],
   [
     "The Shining",
@@ -431,6 +533,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt0081505",
     "https://m.media-amazon.com/images/M/MV5BZWFlYmY2MGEtZjVkYS00YzU4LTg0YjQtYzY1ZGE3NTA5NGQxXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
+    "",
+    ["Stanley Kubrick"]
   ],
   [
     "2001: A Space Odyssey",
@@ -439,6 +543,8 @@ export const SEED_MOVIES = [
     8.3,
     "tt0062622",
     "https://m.media-amazon.com/images/M/MV5BMmNlYzRiNDctZWNhMi00MzI4LThkZTctMTUzMmZkMmFmNThmXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["Stanley Kubrick"]
   ],
   [
     "Star Wars",
@@ -447,6 +553,8 @@ export const SEED_MOVIES = [
     8.6,
     "tt0076759",
     "https://m.media-amazon.com/images/M/MV5BOTA5NjhiOTAtZWM0ZC00MWNhLThiMzEtZDFkOTk2OTU1ZDJkXkEyXkFqcGdeQXVyMTA4NDI1NTQx._V1_SX300.jpg",
+    "",
+    ["George Lucas"]
   ],
   [
     "Star Wars: The Empire Strikes Back",
@@ -455,6 +563,8 @@ export const SEED_MOVIES = [
     8.7,
     "tt0080684",
     "https://m.media-amazon.com/images/M/MV5BYTRhNjcwNWQtMGJmMi00NmQyLWE2YzItODVmMTdjNWI0ZDA2XkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_SX300.jpg",
+    "",
+    ["Irvin Kershner"]
   ],
   [
     "Star Wars: Return of the Jedi",
@@ -463,6 +573,8 @@ export const SEED_MOVIES = [
     8.3,
     "tt0086190",
     "https://m.media-amazon.com/images/M/MV5BOWZlMjFiYzgtMTUzNC00Y2IzLTk1NTMtZmNhMTczNTk0ODk1XkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_SX300.jpg",
+    "",
+    ["Richard Marquand"]
   ],
   [
     "Jurassic Park",
@@ -471,6 +583,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt0107290",
     "https://m.media-amazon.com/images/M/MV5BMjM2MDgxMDg0Nl5BMl5BanBnXkFtZTgwNTM2OTM5NDE@._V1_SX300.jpg",
+    "",
+    ["Steven Spielberg"]
   ],
   [
     "E.T. the Extra-Terrestrial",
@@ -479,6 +593,8 @@ export const SEED_MOVIES = [
     7.8,
     "tt0083866",
     "https://m.media-amazon.com/images/M/MV5BMTQ2ODFlMDAtNzdhOC00ZDYzLWE3YTMtNDU4ZGFmZmJmYTczXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
+    "",
+    ["Steven Spielberg"]
   ],
   [
     "Indiana Jones and the Raiders of the Lost Ark",
@@ -487,6 +603,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt0082971",
     null,
+    "",
+    ["Steven Spielberg"]
   ],
   [
     "Indiana Jones and the Last Crusade",
@@ -495,6 +613,8 @@ export const SEED_MOVIES = [
     8.2,
     "tt0097576",
     "https://m.media-amazon.com/images/M/MV5BY2Q0ODg4ZmItNDZiYi00ZWY5LTg2NzctNmYwZjA5OThmNzE1XkEyXkFqcGdeQXVyMjM4MzQ4OTQ@._V1_SX300.jpg",
+    "",
+    ["Steven Spielberg"]
   ],
   [
     "Die Hard",
@@ -503,6 +623,8 @@ export const SEED_MOVIES = [
     8.2,
     "tt0095016",
     "https://m.media-amazon.com/images/M/MV5BZjRlNDUxZjAtOGQ4OC00OTNlLTgxNmQtYTBmMDgwZmNmNjkxXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["John McTiernan"]
   ],
   [
     "Rocky",
@@ -511,6 +633,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt0075148",
     "https://m.media-amazon.com/images/M/MV5BNTBkMjg2MjYtYTZjOS00ODQ0LTg0MDEtM2FiNmJmOGU1NGEwXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg",
+    "",
+    ["John G. Avildsen"]
   ],
   [
     "Taxi Driver",
@@ -519,8 +643,10 @@ export const SEED_MOVIES = [
     8.2,
     "tt0075314",
     "https://m.media-amazon.com/images/M/MV5BM2M1MmVhNDgtNmI0YS00ZDNmLTkyNjctNTJiYTQ2N2NmYzc2XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["Martin Scorsese"]
   ],
-  ["The Big Lebowski", 1998, "Comedy", 8.1, "tt0118715", null],
+  ["The Big Lebowski", 1998, "Comedy", 8.1, "tt0118715", null, "", ["Joel Coen", "Ethan Coen"]],
   [
     "No Country for Old Men",
     2007,
@@ -528,6 +654,8 @@ export const SEED_MOVIES = [
     8.2,
     "tt0477348",
     "https://m.media-amazon.com/images/M/MV5BMjA5Njk3MjM4OV5BMl5BanBnXkFtZTcwMTc5MTE1MQ@@._V1_SX300.jpg",
+    "",
+    ["Joel Coen", "Ethan Coen"]
   ],
   [
     "There Will Be Blood",
@@ -536,6 +664,8 @@ export const SEED_MOVIES = [
     8.2,
     "tt0469494",
     "https://m.media-amazon.com/images/M/MV5BMjAxODQ4MDU5NV5BMl5BanBnXkFtZTcwMDU4MjU1MQ@@._V1_SX300.jpg",
+    "",
+    ["Paul Thomas Anderson"]
   ],
   [
     "Spirited Away",
@@ -544,6 +674,8 @@ export const SEED_MOVIES = [
     8.6,
     "tt0245429",
     "https://m.media-amazon.com/images/M/MV5BMjlmZmI5MDctNDE2YS00YWE0LWE5ZWItZDBhYWQ0NTcxNWRhXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg",
+    "",
+    ["Hayao Miyazaki"]
   ],
   [
     "Princess Mononoke",
@@ -552,6 +684,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt0119698",
     "https://m.media-amazon.com/images/M/MV5BNGIzY2IzODQtNThmMi00ZDE4LWI5YzAtNzNlZTM1ZjYyYjUyXkEyXkFqcGdeQXVyODEzNjM5OTQ@._V1_SX300.jpg",
+    "",
+    ["Hayao Miyazaki"]
   ],
   [
     "Howl's Moving Castle",
@@ -560,6 +694,8 @@ export const SEED_MOVIES = [
     8.2,
     "tt0347149",
     "https://m.media-amazon.com/images/M/MV5BNmM4YTFmMmItMGE3Yy00MmRkLTlmZGEtMzZlOTQzYjk3MzA2XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_SX300.jpg",
+    "",
+    ["Hayao Miyazaki"]
   ],
   [
     "Your Name",
@@ -568,6 +704,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt5311514",
     "https://m.media-amazon.com/images/M/MV5BODRmZDVmNzUtZDA4ZC00NjhkLWI2M2UtN2M0ZDIzNDcxYThjL2ltYWdlXkEyXkFqcGdeQXVyNTk0MzMzODA@._V1_SX300.jpg",
+    "",
+    ["Makoto Shinkai"]
   ],
   [
     "The Incredibles",
@@ -576,6 +714,8 @@ export const SEED_MOVIES = [
     8.0,
     "tt0317705",
     "https://m.media-amazon.com/images/M/MV5BMTY5OTU0OTc2NV5BMl5BanBnXkFtZTcwMzU4MDcyMQ@@._V1_SX300.jpg",
+    "",
+    ["Brad Bird"]
   ],
   [
     "WALL·E",
@@ -584,6 +724,8 @@ export const SEED_MOVIES = [
     8.4,
     "tt0910970",
     "https://m.media-amazon.com/images/M/MV5BMjExMTg5OTU0NF5BMl5BanBnXkFtZTcwMjMxMzMzMw@@._V1_SX300.jpg",
+    "",
+    ["Andrew Stanton"]
   ],
   [
     "Toy Story",
@@ -592,6 +734,8 @@ export const SEED_MOVIES = [
     8.3,
     "tt0114709",
     "https://m.media-amazon.com/images/M/MV5BMDU2ZWJlMjktMTRhMy00ZTA5LWEzNDgtYmNmZTEwZTViZWJkXkEyXkFqcGdeQXVyNDQ2OTk4MzI@._V1_SX300.jpg",
+    "",
+    ["John Lasseter"]
   ],
   [
     "Toy Story 3",
@@ -600,8 +744,10 @@ export const SEED_MOVIES = [
     8.3,
     "tt0435761",
     "https://m.media-amazon.com/images/M/MV5BMTgxOTY4Mjc0MF5BMl5BanBnXkFtZTcwNTA4MDQyMw@@._V1_SX300.jpg",
+    "",
+    ["Lee Unkrich"]
   ],
-  ["Up", 2009, "Animation", 8.2, "tt1049413", null],
+  ["Up", 2009, "Animation", 8.2, "tt1049413", null, "", ["Pete Docter"]],
   [
     "Finding Nemo",
     2003,
@@ -609,6 +755,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt0266543",
     null,
+    "",
+    ["Andrew Stanton"]
   ],
   [
     "The Sixth Sense",
@@ -617,6 +765,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt0167404",
     "https://m.media-amazon.com/images/M/MV5BMWM4NTFhYjctNzUyNi00NGMwLTk3NTYtMDIyNTZmMzRlYmQyXkEyXkFqcGdeQXVyMTAwMzUyOTc@._V1_SX300.jpg",
+    "",
+    ["M. Night Shyamalan"]
   ],
   [
     "Oldboy",
@@ -625,6 +775,8 @@ export const SEED_MOVIES = [
     8.3,
     "tt0364569",
     "https://m.media-amazon.com/images/M/MV5BMTI3NTQyMzU5M15BMl5BanBnXkFtZTcwMTM2MjgyMQ@@._V1_SX300.jpg",
+    "",
+    ["Park Chan-wook"]
   ],
   [
     "The Thing",
@@ -633,6 +785,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt0084787",
     "https://m.media-amazon.com/images/M/MV5BNGViZWZmM2EtNGYzZi00ZDAyLTk3ODMtNzIyZTBjN2Y1NmM1XkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_SX300.jpg",
+    "",
+    ["John Carpenter"]
   ],
   [
     "Pan's Labyrinth",
@@ -641,6 +795,8 @@ export const SEED_MOVIES = [
     8.2,
     "tt0457430",
     "https://m.media-amazon.com/images/M/MV5BYzFjMThiMGItOWRlMC00MDI4LThmOGUtYTNlZGZiYWI1YjMyXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg",
+    "",
+    ["Guillermo del Toro"]
   ],
   [
     "The Lord of the Rings: The Fellowship of the Ring",
@@ -649,6 +805,8 @@ export const SEED_MOVIES = [
     8.8,
     "tt0120737",
     "https://m.media-amazon.com/images/M/MV5BN2EyZjM3NzUtNWUzMi00MTgxLWI0NTctMzY4M2VlOTdjZWRiXkEyXkFqcGdeQXVyNDUzOTQ5MjY@._V1_SX300.jpg",
+    "",
+    ["Peter Jackson"]
   ],
   [
     "The Lord of the Rings: The Two Towers",
@@ -657,6 +815,8 @@ export const SEED_MOVIES = [
     8.7,
     "tt0167261",
     "https://m.media-amazon.com/images/M/MV5BZGMxZTdjZmYtMmE2Ni00ZTdkLWI5NTgtNjlmMjBiNzU2MmI5XkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+    "",
+    ["Peter Jackson"]
   ],
   [
     "The Lord of the Rings: The Return of the King",
@@ -665,6 +825,8 @@ export const SEED_MOVIES = [
     9.0,
     "tt0167260",
     "https://m.media-amazon.com/images/M/MV5BNzA5ZDNlZWMtM2NhNS00NDJjLTk4NDItYTRmY2EwMWZlMTY3XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["Peter Jackson"]
   ],
   [
     "Harry Potter and the Sorcerer's Stone",
@@ -673,6 +835,8 @@ export const SEED_MOVIES = [
     7.6,
     "tt0241527",
     "https://m.media-amazon.com/images/M/MV5BNjQ3NWNlNmQtMTE5ZS00MDdmLTlkZjUtZTBlM2UxMGFiMTU3XkEyXkFqcGdeQXVyNjUwNzk3NDc@._V1_SX300.jpg",
+    "",
+    ["Chris Columbus"]
   ],
   [
     "Harry Potter and the Prisoner of Azkaban",
@@ -681,6 +845,8 @@ export const SEED_MOVIES = [
     7.9,
     "tt0304141",
     "https://m.media-amazon.com/images/M/MV5BMTY4NTIwODg0N15BMl5BanBnXkFtZTcwOTc0MjEzMw@@._V1_SX300.jpg",
+    "",
+    ["Alfonso Cuarón"]
   ],
   [
     "The Hunger Games",
@@ -689,6 +855,8 @@ export const SEED_MOVIES = [
     7.2,
     "tt1392170",
     "https://m.media-amazon.com/images/M/MV5BMjA4NDg3NzYxMF5BMl5BanBnXkFtZTcwNTgyNzkyNw@@._V1_SX300.jpg",
+    "",
+    ["Gary Ross"]
   ],
   [
     "The Grand Budapest Hotel",
@@ -697,6 +865,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt2278388",
     "https://m.media-amazon.com/images/M/MV5BMzM5NjUxOTEyMl5BMl5BanBnXkFtZTgwNjEyMDM0MDE@._V1_SX300.jpg",
+    "",
+    ["Wes Anderson"]
   ],
   [
     "La La Land",
@@ -705,6 +875,8 @@ export const SEED_MOVIES = [
     8.0,
     "tt3783958",
     "https://m.media-amazon.com/images/M/MV5BMzUzNDM2NzM2MV5BMl5BanBnXkFtZTgwNTM3NTg4OTE@._V1_SX300.jpg",
+    "",
+    ["Damien Chazelle"]
   ],
   [
     "The Revenant",
@@ -713,6 +885,8 @@ export const SEED_MOVIES = [
     8.0,
     "tt1663202",
     "https://m.media-amazon.com/images/M/MV5BMDE5OWMzM2QtOTU2ZS00NzAyLWI2MDEtOTRlYjIxZGM0OWRjXkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg",
+    "",
+    ["Alejandro G. Iñárritu"]
   ],
   [
     "Her",
@@ -721,8 +895,10 @@ export const SEED_MOVIES = [
     8.0,
     "tt1798709",
     "https://m.media-amazon.com/images/M/MV5BMjA1Nzk0OTM2OF5BMl5BanBnXkFtZTgwNjU2NjEwMDE@._V1_SX300.jpg",
+    "",
+    ["Spike Jonze"]
   ],
-  ["Blade", 1998, "Action", 7.1, "tt0120611", null],
+  ["Blade", 1998, "Action", 7.1, "tt0120611", null, "", ["Stephen Norrington"]],
   [
     "John Wick",
     2014,
@@ -730,6 +906,8 @@ export const SEED_MOVIES = [
     7.4,
     "tt3039822",
     "https://m.media-amazon.com/images/M/MV5BMTU2NjA1ODgzMF5BMl5BanBnXkFtZTgwMTM2MTI4MjE@._V1_SX300.jpg",
+    "",
+    ["Chad Stahelski"]
   ],
   [
     "Edge of Tomorrow",
@@ -738,6 +916,8 @@ export const SEED_MOVIES = [
     7.9,
     "tt1631867",
     "https://m.media-amazon.com/images/M/MV5BMTc5OTk4MTM3M15BMl5BanBnXkFtZTgwODcxNjg3MDE@._V1_SX300.jpg",
+    "",
+    ["Doug Liman"]
   ],
   [
     "The Iron Giant",
@@ -746,6 +926,8 @@ export const SEED_MOVIES = [
     8.0,
     "tt0129167",
     "https://m.media-amazon.com/images/M/MV5BMjIxNDU2Njk0OV5BMl5BanBnXkFtZTgwODc3Njc3NjE@._V1_SX300.jpg",
+    "",
+    ["Brad Bird"]
   ],
   [
     "Arrival",
@@ -754,6 +936,8 @@ export const SEED_MOVIES = [
     7.9,
     "tt2543164",
     "https://m.media-amazon.com/images/M/MV5BMTExMzU0ODcxNDheQTJeQWpwZ15BbWU4MDE1OTI4MzAy._V1_SX300.jpg",
+    "",
+    ["Denis Villeneuve"]
   ],
   [
     "Ex Machina",
@@ -762,6 +946,8 @@ export const SEED_MOVIES = [
     7.7,
     "tt0470752",
     "https://m.media-amazon.com/images/M/MV5BMTUxNzc0OTIxMV5BMl5BanBnXkFtZTgwNDI3NzU2NDE@._V1_SX300.jpg",
+    "",
+    ["Alex Garland"]
   ],
   [
     "Moonlight",
@@ -770,6 +956,8 @@ export const SEED_MOVIES = [
     7.4,
     "tt4975722",
     "https://m.media-amazon.com/images/M/MV5BNzQxNTIyODAxMV5BMl5BanBnXkFtZTgwNzQyMDA3OTE@._V1_SX300.jpg",
+    "",
+    ["Barry Jenkins"]
   ],
   [
     "12 Years a Slave",
@@ -778,6 +966,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt2024544",
     "https://m.media-amazon.com/images/M/MV5BMjExMTEzODkyN15BMl5BanBnXkFtZTcwNTU4NTc4OQ@@._V1_SX300.jpg",
+    "",
+    ["Steve McQueen"]
   ],
   [
     "Manchester by the Sea",
@@ -786,6 +976,8 @@ export const SEED_MOVIES = [
     7.8,
     "tt4034228",
     "https://m.media-amazon.com/images/M/MV5BMTYxMjk0NDg4Ml5BMl5BanBnXkFtZTgwODcyNjA5OTE@._V1_SX300.jpg",
+    "",
+    ["Kenneth Lonergan"]
   ],
   [
     "Jaws",
@@ -794,6 +986,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt0073195",
     "https://m.media-amazon.com/images/M/MV5BMmVmODY1MzEtYTMwZC00MzNhLWFkNDMtZjAwM2EwODUxZTA5XkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_SX300.jpg",
+    "",
+    ["Steven Spielberg"]
   ],
   [
     "The Terminator",
@@ -802,6 +996,8 @@ export const SEED_MOVIES = [
     8.1,
     "tt0088247",
     "https://m.media-amazon.com/images/M/MV5BYTViNzMxZjEtZGEwNy00MDNiLWIzNGQtZDY2MjQ1OWViZjFmXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+    "",
+    ["James Cameron"]
   ],
   [
     "Logan",
@@ -810,5 +1006,7 @@ export const SEED_MOVIES = [
     8.1,
     "tt3315342",
     "https://m.media-amazon.com/images/M/MV5BYzc5MTU4N2EtYTkyMi00NjdhLTg3NWEtMTY4OTEyMzJhZTAzXkEyXkFqcGdeQXVyNjc1NTYyMjg@._V1_SX300.jpg",
-  ],
+    "",
++    ["James Mangold"]
+  ]
 ];

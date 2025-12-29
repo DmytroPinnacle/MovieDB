@@ -9,7 +9,7 @@ import { createList } from './list-models.js';
 export function qs(sel, parent=document){ return parent.querySelector(sel); }
 export function qsa(sel, parent=document){ return Array.from(parent.querySelectorAll(sel)); }
 
-export function renderMovieList({ filterText='', genres=[], watchers=[], lists=[], sort='title-asc' }) {
+export function renderMovieList({ filterText='', genres=[], watchers=[], lists=[], directors=[], sort='title-asc' }) {
   const listEl = qs('#movieList');
   const emptyState = qs('#emptyState');
   const tpl = qs('#movieItemTemplate');
@@ -26,6 +26,13 @@ export function renderMovieList({ filterText='', genres=[], watchers=[], lists=[
       return genres.every(selectedGenre => 
         movieGenres.some(movieGenre => movieGenre.toLowerCase() === selectedGenre.toLowerCase())
       );
+    });
+  }
+  if (directors.length > 0) {
+    movies = movies.filter(m => {
+      // OR logic: movie must have AT LEAST ONE of the selected directors
+      const movieDirectorIds = m.directorIds || [];
+      return directors.some(selectedDirectorId => movieDirectorIds.includes(selectedDirectorId));
     });
   }
   if (watchers.length > 0) {

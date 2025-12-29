@@ -2,8 +2,8 @@
  * Seed Initializer
  * Loads seed data into repositories
  */
-import { movieRepository, watcherRepository, sessionRepository } from '../dal/index.js';
-import { createMovie } from '../models.js';
+import { movieRepository, watcherRepository, sessionRepository, directorRepository } from '../dal/index.js';
+import { createMovie, createDirector } from '../models.js';
 import { createWatcher } from '../watcher-models.js';
 import { createSession } from '../session-models.js';
 import { SEED_MOVIES } from './seed.js';
@@ -31,26 +31,77 @@ export function seedWatchers() {
  * Initialize movies from seed data
  */
 export function seedMovies() {
-  if (movieRepository.count() > 0) {
-    console.info('Movies already exist, skipping seed.');
-    return;
-  }
+  const existingCount = movieRepository.count();
   
-  SEED_MOVIES.forEach(([title, year, genres, rating, imdbId, posterUrl, kinopoiskId]) => {
-    const movie = createMovie({ 
-      title, 
-      year, 
-      genres: Array.isArray(genres) ? genres : [genres], // Handle both old and new format
-      rating, 
-      posterUrl: posterUrl || '', 
-      notes: '', 
-      imdbId: imdbId || '',
-      kinopoiskId: kinopoiskId || ''
-    });
-    movieRepository.add(movie);
+  SEED_MOVIES.forEach(([title, year, genres, rating, imdbId, posterUrl, kinopoiskId, directorNames]) => {
+    let movie = null;
+    
+    // Check if movie exists
+    if (existingCount > 0) {
+      const found = movieRepository.findWhere(m => m.title === title && m.year === year);
+      if (found.length > 0) movie = found[0];
+    }
+    
+    // If movie exists and has directors, skip
+    if (movie && movie.directorIds && movie.directorIds.length > 0) {
+      return;
+    }
+
+    // Handle directors
+    const directorIds = [];
+    if (directorNames && Array.isArray(directorNames)) {
+      directorNames.forEach(name => {
+        let director = directorRepository.findWhere(d => d.name === name)[0];
+        if (!director) {
+          director = createDirector({ name });
+          directorRepository.add(director);
+        }
+        directorIds.push(director.id);
+      });
+    }
+
+    if (movie) {
+      // Update existing movie with directors
+      if (directorIds.length > 0) {
+        movie.directorIds = directorIds;
+        movieRepository.update(movie.id, movie);
+      }
+    } else if (existingCount === 0) {
+      // Only create new movies if we are in a fresh seed state
+      // (Prevents re-adding movies user might have deleted if we just ran update)
+      // However, for this fix, we mainly care about updating existing ones.
+      // But let's keep the original behavior: if count=0, add all.
+      
+      const newMovie = createMovie({ 
+        title, 
+        year, 
+        genres: Array.isArray(genres) ? genres : [genres], // Handle both old and new format
+        rating, 
+        posterUrl: posterUrl || '', 
+        notes: '', 
+        imdbId: imdbId || '',
+        kinopoiskId: kinopoiskId || '',
+        directorIds: directorIds
+      });
+      movieRepository.add(newMovie);
+      movie = newMovie;
+    }
+
+    // Update directors with movie ID if we have a movie object
+    if (movie) {
+      directorIds.forEach(dId => {
+        const director = directorRepository.getById(dId);
+        if (director) {
+          if (!director.movieIds.includes(movie.id)) {
+              director.movieIds.push(movie.id);
+              directorRepository.update(dId, director);
+          }
+        }
+      });
+    }
   });
   
-  console.info(`Seeded ${SEED_MOVIES.length} movies.`);
+  console.info(`Processed seed movies. Existing count: ${existingCount}`);
 }
 
 /**

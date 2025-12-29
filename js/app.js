@@ -8,6 +8,7 @@ import { createSession } from './session-models.js';
 import { getLists } from './list-storage.js';
 import { initializeSeedData } from './DataSeed/initializer.js';
 import { GenreDropdown } from './genre-dropdown.js';
+import { DirectorDropdown } from './director-dropdown.js';
 import { 
   renderMovieList, populateGenreFilter, populateWatcherFilter, populateListFilter, resetForm, showErrors, 
   renderWatcherList, fillWatcherForm, resetWatcherForm, showWatcherModal, hideWatcherModal,
@@ -21,10 +22,12 @@ const viewState = {
   genres: [],
   watchers: [],
   lists: [],
+  directors: [],
   sort: 'title-asc'
 };
 
 let genreDropdown = null;
+let directorFilterDropdown = null;
 
 function init() {
   // Initialize seed data if needed
@@ -39,6 +42,15 @@ function init() {
   genreDropdown = new GenreDropdown('genreDropdown', {
     selectedGenres: [],
     placeholder: 'Select genres...'
+  });
+
+  // Initialize director filter dropdown
+  directorFilterDropdown = new DirectorDropdown('filterDirector', {
+    placeholder: 'All Directors',
+    onChange: (selectedIds) => {
+      viewState.directors = selectedIds;
+      renderMovieList(viewState);
+    }
   });
   
   populateGenreFilter();

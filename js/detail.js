@@ -7,6 +7,8 @@ import { initializeSeedData } from './DataSeed/initializer.js';
 import { createSession, validateSessionFields, updateSession, dateStringToTimestamp } from './session-models.js';
 import { WatcherDropdown } from './watcher-dropdown.js';
 import { GenreDropdown } from './genre-dropdown.js';
+import { directorRepository } from './dal/index.js';
+import { createDirector } from './models.js';
 
 let sessionWatcherDropdown = null;
 let genreDropdown = null;
@@ -103,6 +105,14 @@ function renderMovieDetail(movie) {
         <span class="detail-field-label">Rating:</span>
         <span class="detail-field-value">${movie.rating != null ? movie.rating + ' / 10' : 'Not rated'}</span>
         <button class="edit-field-btn" aria-label="Edit rating">✏️</button>
+      </div>
+      <div class="detail-field editable" data-field="directors">
+        <span class="detail-field-label">Director:</span>
+        <span class="detail-field-value">${escapeHtml((movie.directorIds || []).map(id => {
+          const d = directorRepository.getById(id);
+          return d ? d.name : '';
+        }).filter(Boolean).join(', ') || 'Unknown')}</span>
+        <button class="edit-field-btn" aria-label="Edit directors">✏️</button>
       </div>
       ${movie.imdbId || true ? `
       <div class="detail-field editable" data-field="imdbId">
@@ -824,11 +834,20 @@ function enterNotesEditMode(sectionContainer, movie) {
 }
 
 function enterEditMode(fieldContainer, fieldName, movie, valueSpan) {
-  const currentValue = fieldName === 'rating' 
-    ? (movie[fieldName] != null ? movie[fieldName] : '')
-    : (fieldName === 'genres'
-      ? (Array.isArray(movie.genres) ? movie.genres : (movie.genre ? [movie.genre] : []))
-      : movie[fieldName]);
+  let currentValue;
+  
+  if (fieldName === 'rating') {
+    currentValue = movie[fieldName] != null ? movie[fieldName] : '';
+  } else if (fieldName === 'genres') {
+    currentValue = Array.isArray(movie.genres) ? movie.genres : (movie.genre ? [movie.genre] : []);
+  } else if (fieldName === 'directors') {
+    currentValue = (movie.directorIds || []).map(id => {
+      const d = directorRepository.getById(id);
+      return d ? d.name : '';
+    }).filter(Boolean).join(', ');
+  } else {
+    currentValue = movie[fieldName] || '';
+  }
   
   let input;
   let isDropdown = false;
@@ -948,20 +967,60 @@ function enterEditMode(fieldContainer, fieldName, movie, valueSpan) {
     const { updateMovie } = await import('./models.js');
     
     // Update movie
-    let updateValue;
-    if (fieldName === 'genres') {
-      // Already an array from dropdown
-      updateValue = newValue;
-    } else if (fieldName === 'year' || fieldName === 'rating') {
-      updateValue = newValue === '' ? null : Number(newValue);
-    } else {
-      updateValue = newValue === '' ? '' : newValue;
-    }
+    let updates = { ...movie };
     
-    const updates = {
-      ...movie,
-      [fieldName]: updateValue
-    };
+    if (fieldName === 'directors') {
+      const names = newValue.split(',').map(n => n.trim()).filter(Boolean);
+      const newDirectorIds = [];
+      
+      // Process each name
+      names.forEach(name => {
+        // Case-insensitive search
+        let director = directorRepository.findWhere(d => d.name.toLowerCase() === name.toLowerCase())[0];
+        if (!director) {
+          director = createDirector({ name });
+          directorRepository.add(director);
+        }
+        newDirectorIds.push(director.id);
+      });
+      
+      // Update relationships
+      const oldDirectorIds = movie.directorIds || [];
+      
+      // Remove movie from directors that were removed
+      oldDirectorIds.forEach(dId => {
+        if (!newDirectorIds.includes(dId)) {
+          const d = directorRepository.getById(dId);
+          if (d) {
+            d.movieIds = d.movieIds.filter(mId => mId !== movie.id);
+            directorRepository.update(d.id, d);
+          }
+        }
+      });
+      
+      // Add movie to directors that are new (or ensure it's there)
+      newDirectorIds.forEach(dId => {
+        const d = directorRepository.getById(dId);
+        if (d && !d.movieIds.includes(movie.id)) {
+          d.movieIds.push(movie.id);
+          directorRepository.update(d.id, d);
+        }
+      });
+      
+      updates.directorIds = newDirectorIds;
+      
+    } else {
+      let updateValue;
+      if (fieldName === 'genres') {
+        // Already an array from dropdown
+        updateValue = newValue;
+      } else if (fieldName === 'year' || fieldName === 'rating') {
+        updateValue = newValue === '' ? null : Number(newValue);
+      } else {
+        updateValue = newValue === '' ? '' : newValue;
+      }
+      updates[fieldName] = updateValue;
+    }
     
     const updated = updateMovie(movie, updates);
     updateMovieInStore(movie.id, updated);

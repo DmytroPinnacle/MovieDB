@@ -1,6 +1,8 @@
 import { movieRepository } from './MovieRepository.js';
 import { watcherRepository } from './WatcherRepository.js';
 import { sessionRepository } from './SessionRepository.js';
+import { listRepository } from './ListRepository.js';
+import { tierListRepository } from './TierListRepository.js';
 
 /**
  * Data Manager
@@ -19,7 +21,9 @@ class DataManager {
       data: {
         movies: movieRepository.exportData(),
         watchers: watcherRepository.exportData(),
-        sessions: sessionRepository.exportData()
+        sessions: sessionRepository.exportData(),
+        lists: listRepository.exportData(),
+        tierLists: tierListRepository.exportData()
       }
     };
   }
@@ -34,13 +38,15 @@ class DataManager {
       throw new Error('Invalid JSON data format');
     }
 
-    const { movies, watchers, sessions } = jsonData.data;
+    const { movies, watchers, sessions, lists, tierLists } = jsonData.data;
 
     if (!merge) {
       // Clear existing data before import
       movieRepository.clear();
       watcherRepository.clear();
       sessionRepository.clear();
+      listRepository.clear();
+      tierListRepository.clear();
     }
 
     // Import movies
@@ -68,6 +74,24 @@ class DataManager {
         sessions.forEach(session => sessionRepository.add(session));
       } else {
         sessionRepository.loadData(sessions);
+      }
+    }
+
+    // Import lists
+    if (Array.isArray(lists)) {
+      if (merge) {
+        lists.forEach(item => listRepository.add(item));
+      } else {
+        listRepository.loadData(lists);
+      }
+    }
+
+    // Import tier lists
+    if (Array.isArray(tierLists)) {
+      if (merge) {
+        tierLists.forEach(item => tierListRepository.add(item));
+      } else {
+        tierListRepository.loadData(tierLists);
       }
     }
   }
@@ -126,6 +150,8 @@ class DataManager {
     movieRepository.clear();
     watcherRepository.clear();
     sessionRepository.clear();
+    listRepository.clear();
+    tierListRepository.clear();
   }
 
   /**

@@ -18,6 +18,8 @@ export class DirectorDropdown {
     // Bind methods
     this.handleDocumentClick = this.handleDocumentClick.bind(this);
     
+    // Prepare initial list before first render
+    this.prepareList();
     this.render();
     
     // Global listener

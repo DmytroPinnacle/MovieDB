@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tier Lists - MovieDB</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .tier-lists-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .tier-list-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+        border-radius: var(--radius);
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        position: relative;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.2s;
+    }
+    .tier-list-card:hover {
+        border-color: var(--primary);
+    }
+    .tier-list-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .tier-list-card-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        padding-right: 2rem;
+    }
+    .list-menu-btn {
+        background: transparent;
+        color: var(--muted);
+        padding: 0.25rem;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        z-index: 2; /* Ensure above card link if applicable */
+    }
+    .list-menu-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text);
+    }
+    .list-context-menu {
+        position: absolute;
+        top: 2rem;
+        right: 0.5rem;
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: var(--radius);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 10;
+        min-width: 120px;
+        padding: 0.25rem;
+        display: flex;
+        flex-direction: column;
+    }
+    .list-context-menu button {
+        background: transparent;
+        color: var(--text);
+        text-align: left;
+        padding: 0.5rem 0.75rem;
+        width: 100%;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    .list-context-menu button:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .list-context-menu button.danger {
+        color: var(--danger);
+    }
+    .list-context-menu button.danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+    .hidden { display: none; }
+
+    .tier-list-info {
+        font-size: 0.9rem;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        /* Ensure truncation works inside flex item */
+        min-width: 0; 
+    }
+    .truncate-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .movie-preview {
+        color: var(--text);
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <h1>🎬 MovieDB</h1>
+    <nav class="header-nav">
+      <a href="index.html" class="nav-link">🎬 Movies</a>
+      <a href="lists.html" class="nav-link">📋 My Lists</a>
+      <a href="watchers.html" class="nav-link">👥 Watchers</a>
+      <a href="tier-lists.html" class="nav-link active">🏆 Tier Lists</a>
+      <a href="data-manager.html" class="nav-link icon-only" title="Settings / Data Manager">⚙️</a>
+    </nav>
+  </header>
+  <main class="layout full-width">
+    <div class="page-header">
+      <h2>🏆 Tier Lists</h2>
+      <button id="addTierListBtn" class="primary">+ New Tier List</button>
+    </div>
+
+    <div id="tierListsContainer" class="tier-lists-grid"></div>
+
+    <!-- Add/Edit Tier List Modal -->
+    <dialog id="tierListModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Create Tier List</h3>
+          <button id="closeModalBtn" class="icon-btn" aria-label="Close">&times;</button>
+        </div>
+        <form id="tierListForm" novalidate>
+          <input type="hidden" id="tierListId" />
+          <div class="field">
+            <label for="tierListName">Tier List Name</label>
+            <input id="tierListName" name="name" required maxlength="120" placeholder="My Tier List" autocomplete="off" />
+            <small class="error" data-error-for="name"></small>
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="primary" id="saveTierListBtn">Save</button>
+            <button type="button" id="cancelBtn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <!-- Delete Confirmation Modal -->
+    <dialog id="deleteModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Confirm Delete</h3>
+          <button id="closeDeleteModalBtn" class="icon-btn" aria-label="Close">&times;</button>
+        </div>
+        <p>Are you sure you want to delete this tier list? This action cannot be undone.</p>
+        <div class="modal-actions">
+          <button id="confirmDeleteBtn" class="danger">Delete</button>
+          <button id="cancelDeleteBtn">Cancel</button>
+        </div>
+      </div>
+    </dialog>
+  </main>
+
+  <script type="module" src="js/tier-lists-app.js"></script>
+</body>
+</html>

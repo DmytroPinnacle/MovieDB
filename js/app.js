@@ -1,5 +1,7 @@
 // App entrypoint: wiring events + orchestrating modules
-import { createMovie, validateMovieFields, updateMovie as mergeMovie } from './models.js';
+import { createMovie, validateMovieFields, updateMovie as mergeMovie, createDirector } from './models.js';
+import { directorRepository } from './dal/index.js';
+import { OmdbService } from './services/OmdbService.js';
 import { loadMovies, addMovie, updateMovieInStore, getMovies } from './storage.js';
 import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatchers } from './watcher-storage.js';
 import { createWatcher, validateWatcherFields, updateWatcher as mergeWatcher, getWatcherFullName } from './watcher-models.js';
@@ -29,6 +31,8 @@ const viewState = {
 let genreDropdown = null;
 let directorFilterDropdown = null;
 let movieDirectorDropdown = null;
+// Use 'trilogy' or your own key. Limit: 1000 requests/day
+const omdbService = new OmdbService('trilogy');
 
 function init() {
   // Initialize seed data if needed
@@ -199,6 +203,59 @@ function wireEvents() {
     viewState.sort = sortSelect.value;
     renderMovieList(viewState);
   });
+
+  // Auto-fill from OMDb when IMDB ID is entered
+  const imdbInput = qs('#imdbId');
+  if (imdbInput) {
+    imdbInput.addEventListener('blur', async () => {
+      const imdbId = imdbInput.value.trim();
+      if (!imdbId || !/^tt\d{7,8}$/.test(imdbId)) return;
+
+      const data = await omdbService.getMovieByImdbId(imdbId);
+      if (data) {
+        const titleInput = qs('#title');
+        const yearInput = qs('#year');
+        const ratingInput = qs('#rating');
+        const posterInput = qs('#posterUrl');
+        const notesInput = qs('#notes');
+
+        if (!titleInput.value && data.title) titleInput.value = data.title;
+        if (!yearInput.value && data.year) yearInput.value = data.year;
+        if (!ratingInput.value && data.imdbRating) ratingInput.value = data.imdbRating;
+        if (!posterInput.value && data.poster && data.poster !== 'N/A') posterInput.value = data.poster;
+        if (!notesInput.value && data.plot && data.plot !== 'N/A') notesInput.value = data.plot;
+
+        // Genres
+        if (data.genre && data.genre !== 'N/A') {
+            const currentGenres = genreDropdown.getSelectedGenres();
+            if (currentGenres.length === 0) {
+                const newGenres = data.genre.split(',').map(g => g.trim());
+                genreDropdown.setSelectedGenres(newGenres);
+            }
+        }
+
+        // Directors
+        if (data.director && data.director !== 'N/A') {
+            const currentDirectors = movieDirectorDropdown.getSelectedIds();
+            if (currentDirectors.length === 0) {
+                const names = data.director.split(',').map(d => d.trim());
+                const newIds = [];
+                const allDirectors = directorRepository.getAll();
+                
+                names.forEach(name => {
+                    let dir = allDirectors.find(d => d.name.toLowerCase() === name.toLowerCase());
+                    if (!dir) {
+                        dir = createDirector({ name });
+                        directorRepository.add(dir);
+                    }
+                    newIds.push(dir.id);
+                });
+                movieDirectorDropdown.setSelection(newIds);
+            }
+        }
+      }
+    });
+  }
 
   form.addEventListener('submit', onSubmitForm);
   form.addEventListener('reset', () => setTimeout(()=> showErrors({}), 0));

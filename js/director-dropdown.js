@@ -1,4 +1,5 @@
 import { directorRepository } from './dal/index.js';
+import { createDirector } from './models.js';
 
 export class DirectorDropdown {
   constructor(containerId, options = {}) {
@@ -35,6 +36,16 @@ export class DirectorDropdown {
           this.isOpen = false;
           this.render();
       }
+  }
+
+  setSelection(ids) {
+    this.selectedDirectorIds = ids || [];
+    this.prepareList();
+    this.render();
+  }
+  
+  getSelectedIds() {
+    return this.selectedDirectorIds;
   }
   
   prepareList() {
@@ -82,6 +93,20 @@ export class DirectorDropdown {
         }).join(', ');
     }
     
+    // Check if we should show "Add new" option
+    let addOptionHTML = '';
+    if (this.searchTerm) {
+        const term = this.searchTerm.trim();
+        const exists = allDirectors.some(d => d.name.toLowerCase() === term.toLowerCase());
+        if (!exists && term.length > 0) {
+            addOptionHTML = `
+                <div class="multiselect-option create-new-option" style="border-top:1px solid #334155; color: #60a5fa;">
+                   + Create "${this.escapeHtml(term)}"
+                </div>
+            `;
+        }
+    }
+
     const listHTML = this.renderList(directors);
     
     // Save scroll position
@@ -98,13 +123,14 @@ export class DirectorDropdown {
                 name="director-search"
                 autocomplete="off"
                 class="director-search-input" 
-                placeholder="Search..." 
+                placeholder="Search or add..." 
                 value="${this.escapeHtml(this.searchTerm)}"
                 style="width:100%; padding:0.4rem; background:#0f172a; border:1px solid #334155; color:white; border-radius:4px;"
                 aria-label="Search directors"
             />
           </div>
           <div class="director-list-scroll" style="max-height: 200px; overflow-y: auto;">
+            ${addOptionHTML}
             ${listHTML}
           </div>
         </div>
@@ -172,6 +198,24 @@ export class DirectorDropdown {
     listContainer.addEventListener('click', (e) => {
         e.stopPropagation(); 
         
+        // Handle "Create New" click
+        const createOption = e.target.closest('.create-new-option');
+        if (createOption) {
+            const name = this.searchTerm.trim();
+            if (name) {
+                const newDirector = createDirector({ name });
+                directorRepository.add(newDirector);
+                this.selectedDirectorIds.push(newDirector.id);
+                this.searchTerm = '';
+                
+                // Refresh list
+                this.onChange(this.selectedDirectorIds);
+                this.prepareList();
+                this.render();
+            }
+            return;
+        }
+
         const option = e.target.closest('.multiselect-option');
         if (option) {
             const id = option.dataset.id;

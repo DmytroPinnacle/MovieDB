@@ -28,6 +28,7 @@ const viewState = {
 
 let genreDropdown = null;
 let directorFilterDropdown = null;
+let movieDirectorDropdown = null;
 
 function init() {
   // Initialize seed data if needed
@@ -42,6 +43,11 @@ function init() {
   genreDropdown = new GenreDropdown('genreDropdown', {
     selectedGenres: [],
     placeholder: 'Select genres...'
+  });
+  
+  // Initialize director dropdown for Add Movie form
+  movieDirectorDropdown = new DirectorDropdown('directorDropdown', {
+    placeholder: 'Select directors...'
   });
 
   // Initialize director filter dropdown
@@ -316,6 +322,8 @@ function onSubmitForm(e) {
   
   // Get selected genres from dropdown
   fields.genres = genreDropdown.getSelectedGenres();
+  // Get selected directors
+  fields.directorIds = movieDirectorDropdown.getSelectedIds();
   
   const errors = validateMovieFields(fields);
   showErrors(errors);
@@ -326,6 +334,7 @@ function onSubmitForm(e) {
   resetForm();
   // Reset genre dropdown
   genreDropdown.setSelectedGenres([]);
+  movieDirectorDropdown.setSelection([]);
   populateGenreFilter();
   populateWatcherFilter();
   renderMovieList(viewState);

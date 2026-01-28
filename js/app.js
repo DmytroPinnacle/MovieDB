@@ -219,13 +219,11 @@ function wireEvents() {
         const yearInput = qs('#year');
         const ratingInput = qs('#rating');
         const posterInput = qs('#posterUrl');
-        const notesInput = qs('#notes');
 
         if (!titleInput.value && data.title) titleInput.value = data.title;
         if (!yearInput.value && data.year) yearInput.value = data.year;
         if (!ratingInput.value && data.imdbRating) ratingInput.value = data.imdbRating;
         if (!posterInput.value && data.poster && data.poster !== 'N/A') posterInput.value = data.poster;
-        if (!notesInput.value && data.plot && data.plot !== 'N/A') notesInput.value = data.plot;
 
         // Genres
         if (data.genre && data.genre !== 'N/A') {

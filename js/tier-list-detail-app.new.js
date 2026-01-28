@@ -1,6 +1,5 @@
 // See tier-list-storage.js which wraps repository
 import { tierListRepository, watcherRepository, movieRepository } from './dal/index.js';
-import { initializeSeedData } from './DataSeed/initializer.js';
 import { getWatcherFullName } from './watcher-models.js';
 
 // State
@@ -28,7 +27,6 @@ async function init() {
     return;
   }
   
-  await initializeSeedData();
   await Promise.all([
       tierListRepository.load(),
       watcherRepository.load(),

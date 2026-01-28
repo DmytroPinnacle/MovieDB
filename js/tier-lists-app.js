@@ -1,5 +1,4 @@
 import { tierListRepository, watcherRepository, movieRepository } from './dal/index.js';
-import { initializeSeedData } from './DataSeed/initializer.js';
 import { createTierList, validateTierListFields } from './tier-list-models.js';
 
 // State
@@ -28,7 +27,6 @@ async function init() {
   if (deleteModal) deleteModal.close();
   
   // Seed repositories so dropdowns and lists have data
-  await initializeSeedData();
   await Promise.all([
       tierListRepository.load(),
       watcherRepository.load(), // Needed for participants maybe?

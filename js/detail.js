@@ -3,7 +3,6 @@ import { loadMovies, deleteMovie } from './storage.js';
 import { loadWatchers, getWatcherById, getWatchers } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
 import { loadSessions, getSessionsByMovieId, addSession, updateSessionInStore, deleteSession } from './session-storage.js';
-import { initializeSeedData } from './DataSeed/initializer.js';
 import { createSession, validateSessionFields, updateSession, dateStringToTimestamp } from './session-models.js';
 import { WatcherDropdown } from './watcher-dropdown.js';
 import { GenreDropdown } from './genre-dropdown.js';
@@ -578,7 +577,6 @@ function handleDeleteMovie(movie) {
 }
 
 async function init() {
-  await initializeSeedData(); // Initialize seed data if needed
   await loadWatchers(); // Load watchers data
   await loadSessions(); // Load sessions data
   const movieId = getMovieIdFromURL();

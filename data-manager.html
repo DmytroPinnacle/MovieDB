@@ -132,32 +132,6 @@
       </div>
     </div>
 
-    <!-- Export Section -->
-    <div class="section">
-      <h2>Export Data</h2>
-      <p>Download all your data as a JSON file for backup or transfer.</p>
-      <div class="button-group">
-        <button class="btn btn-primary" id="exportBtn">
-          📥 Export to JSON
-        </button>
-      </div>
-    </div>
-
-    <!-- Import Section -->
-    <div class="section">
-      <h2>Import Data</h2>
-      <p>Upload a JSON file to import data. Choose whether to merge with existing data or replace it.</p>
-      <div class="button-group">
-        <button class="btn btn-secondary" id="importReplaceBtn">
-          📤 Import (Replace All)
-        </button>
-        <button class="btn btn-secondary" id="importMergeBtn">
-          📤 Import (Merge)
-        </button>
-      </div>
-      <input type="file" id="fileInput" class="file-input" accept=".json">
-    </div>
-
     <!-- Seed Data Section -->
     <div class="section">
       <h2>Initialize Seed Data</h2>
@@ -169,26 +143,6 @@
       </div>
     </div>
 
-    <!-- Clear Data Section -->
-    <div class="section">
-      <h2>Clear All Data</h2>
-      <p><strong>Warning:</strong> This will permanently delete all data from the application.</p>
-      <div class="button-group">
-        <button class="btn btn-danger" id="clearBtn">
-          🗑️ Clear All Data
-        </button>
-      </div>
-    </div>
-
-    <!-- Navigation -->
-    <div class="section">
-      <h2>Navigation</h2>
-      <div class="button-group">
-        <a href="index.html" class="btn btn-primary">Go to Movies</a>
-        <a href="watchers.html" class="btn btn-primary">Go to Watchers</a>
-      </div>
-    </div>
-
     <!-- Message Area -->
     <div id="message" class="message"></div>
   </div>
@@ -196,8 +150,6 @@
   <script type="module">
     import { dataManager } from './js/dal/DataManager.js';
     import { initializeSeedData } from './js/DataSeed/initializer.js';
-
-    let importMode = 'replace';
 
     function updateStats() {
       const stats = dataManager.getStats();
@@ -216,67 +168,17 @@
       }, 5000);
     }
 
-    // Export functionality
-    document.getElementById('exportBtn').addEventListener('click', () => {
-      try {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-        dataManager.downloadJSON(`moviedb-export-${timestamp}.json`);
-        showMessage('Data exported successfully!', 'success');
-      } catch (err) {
-        showMessage('Export failed: ' + err.message, 'error');
-      }
-    });
-
-    // Import functionality
-    document.getElementById('importReplaceBtn').addEventListener('click', () => {
-      importMode = 'replace';
-      document.getElementById('fileInput').click();
-    });
-
-    document.getElementById('importMergeBtn').addEventListener('click', () => {
-      importMode = 'merge';
-      document.getElementById('fileInput').click();
-    });
-
-    document.getElementById('fileInput').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      try {
-        await dataManager.uploadJSON(file, importMode === 'merge');
-        updateStats();
-        showMessage(`Data imported successfully (${importMode} mode)!`, 'success');
-      } catch (err) {
-        showMessage('Import failed: ' + err.message, 'error');
-      }
-
-      // Reset file input
-      e.target.value = '';
-    });
-
     // Seed data
     document.getElementById('seedBtn').addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to load seed data? This may add duplicates or reset data depending on configuration.')) {
+        return;
+      }
       try {
         await initializeSeedData();
         updateStats();
         showMessage('Seed data loaded successfully!', 'success');
       } catch (err) {
         showMessage('Seeding failed: ' + err.message, 'error');
-      }
-    });
-
-    // Clear all data
-    document.getElementById('clearBtn').addEventListener('click', () => {
-      if (!confirm('Are you sure you want to delete ALL data? This cannot be undone!')) {
-        return;
-      }
-
-      try {
-        dataManager.clearAll();
-        updateStats();
-        showMessage('All data cleared successfully!', 'success');
-      } catch (err) {
-        showMessage('Clear failed: ' + err.message, 'error');
       }
     });
 

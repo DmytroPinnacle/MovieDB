@@ -5,7 +5,6 @@
 
 import { createWatcher, validateWatcherFields, updateWatcher, getWatcherFullName } from './watcher-models.js';
 import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatchers, toggleFavorite, isFavorite, getFavorites, getWatchersSortedByFavorites } from './watcher-storage.js';
-import { initializeSeedData } from './DataSeed/initializer.js';
 
 // ===== STATE MANAGEMENT =====
 let currentEditId = null;
@@ -26,8 +25,7 @@ const searchInput = document.getElementById('searchInput');
 
 // ===== INITIALIZATION =====
 async function init() {
-  try {
-    await initializeSeedData(); 
+  try { 
     await loadWatchers();
   } catch (err) {
     console.error("Initialization failed", err);

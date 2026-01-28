@@ -5,7 +5,6 @@ import { getWatcherById, loadWatchers } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
 import { getSessionsByWatcherId, getWatchedMovieIdsByWatcherId, loadSessions } from './session-storage.js';
 import { loadMovies, getMovies } from './storage.js';
-import { initializeSeedData } from './DataSeed/initializer.js';
 
 console.log('All imports successful');
 
@@ -77,7 +76,6 @@ const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep
 // Initialize the page
 async function init() {
   console.log('init() called');
-  await initializeSeedData(); // Initialize seed data (Async)
   
   try {
     console.log('watcherId:', watcherId);

@@ -8,7 +8,6 @@ import { createWatcher, validateWatcherFields, updateWatcher as mergeWatcher, ge
 import { loadSessions, addSession, getSessions } from './session-storage.js';
 import { createSession } from './session-models.js';
 import { getLists, loadLists } from './list-storage.js';
-import { initializeSeedData } from './DataSeed/initializer.js';
 import { GenreDropdown } from './genre-dropdown.js';
 import { DirectorDropdown } from './director-dropdown.js';
 import { 
@@ -35,8 +34,6 @@ let movieDirectorDropdown = null;
 const omdbService = new OmdbService('trilogy');
 
 async function init() {
-  // Initialize seed data if needed
-  await initializeSeedData();
   
   // Load data into UI
   await Promise.all([

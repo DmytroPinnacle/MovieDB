@@ -1,6 +1,5 @@
 
 import { tierListRepository, watcherRepository, movieRepository, directorRepository } from './dal/index.js';
-import { initializeSeedData } from './DataSeed/initializer.js';
 import { getWatcherFullName } from './watcher-models.js';
 import { GenreDropdown } from './genre-dropdown.js';
 import { WatcherDropdown } from './watcher-dropdown.js';
@@ -40,7 +39,6 @@ async function init() {
     return;
   }
   
-  await initializeSeedData();
   await Promise.all([
       tierListRepository.load(),
       watcherRepository.load(),

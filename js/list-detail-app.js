@@ -3,7 +3,6 @@ import { getMovies, loadMovies } from './storage.js';
 import { loadSessions, getLatestSessionByMovieId, getSessionsByMovieId } from './session-storage.js';
 import { loadWatchers, isFavorite } from './watcher-storage.js';
 import { qs } from './ui.js';
-import { initializeSeedData } from './DataSeed/initializer.js';
 
 let currentListId = null;
 let currentList = null;
@@ -18,7 +17,6 @@ async function init() {
     return;
   }
 
-  await initializeSeedData();
   await Promise.all([
       loadMovies(),
       loadSessions(),

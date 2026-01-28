@@ -4,7 +4,6 @@ import { getWatchers, loadWatchers } from './watcher-storage.js';
 import { getSessions, loadSessions } from './session-storage.js';
 import { createList } from './list-models.js';
 import { qs, populateGenreFilter, populateWatcherFilter } from './ui.js';
-import { initializeSeedData } from './DataSeed/initializer.js';
 
 const viewState = {
   movieFilter: '',
@@ -14,7 +13,6 @@ const viewState = {
 
 async function init() {
   try {
-    await initializeSeedData();
     await Promise.all([
       loadMovies(),
       loadWatchers(),

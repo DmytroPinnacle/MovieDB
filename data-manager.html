@@ -255,9 +255,9 @@
     });
 
     // Seed data
-    document.getElementById('seedBtn').addEventListener('click', () => {
+    document.getElementById('seedBtn').addEventListener('click', async () => {
       try {
-        initializeSeedData();
+        await initializeSeedData();
         updateStats();
         showMessage('Seed data loaded successfully!', 'success');
       } catch (err) {
@@ -281,7 +281,15 @@
     });
 
     // Initialize
-    updateStats();
+    (async function() {
+        try {
+            await dataManager.initialize();
+            updateStats();
+        } catch (error) {
+            console.error('Failed to initialize data:', error);
+            showMessage('Failed to load current data statistics', 'error');
+        }
+    })();
   </script>
 </body>
 </html>

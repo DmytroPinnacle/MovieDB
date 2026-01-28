@@ -1,56 +1,49 @@
+const API_URL = 'http://localhost:3000/api';
+
 /**
- * Base Repository class for in-memory CRUD operations with sessionStorage persistence
+ * Base Repository class for SQLite Backend Persistence
  * Provides standard Create, Read, Update, Delete operations
  */
 export class BaseRepository {
   constructor(entityName) {
     this.entityName = entityName;
-    this._storageKey = `moviedb.${entityName.toLowerCase()}.v2`;
+    this.endpoint = entityName.toLowerCase() + 's';
     this._data = [];
-    this._loaded = false;
-    this._loadFromStorage();
+    this._initialized = false;
   }
 
   /**
-   * Load data from sessionStorage
-   * @private
+   * Initialize data from server (Async)
+   * Populates local cache
    */
-  _loadFromStorage() {
-    if (this._loaded) return;
+  async load() {
     try {
-      const raw = sessionStorage.getItem(this._storageKey);
-      if (raw) {
-        this._data = JSON.parse(raw);
+      const response = await fetch(`${API_URL}/${this.endpoint}`);
+      if (!response.ok) {
+         console.warn(`Server returned ${response.status} for ${this.endpoint}`);
+         // Maintain empty array or existing data
+         return this._data;
       }
+      this._data = await response.json();
+      this._initialized = true;
+      return this._data;
     } catch (err) {
-      console.warn(`Failed to load ${this.entityName} from sessionStorage:`, err);
-      this._data = [];
-    }
-    this._loaded = true;
-  }
-
-  /**
-   * Save data to sessionStorage
-   * @private
-   */
-  _saveToStorage() {
-    try {
-      sessionStorage.setItem(this._storageKey, JSON.stringify(this._data));
-    } catch (err) {
-      console.error(`Failed to save ${this.entityName} to sessionStorage:`, err);
+      console.error(`Failed to load ${this.entityName} from API:`, err);
+      return this._data;
     }
   }
 
   /**
-   * Get all entities
-   * @returns {Array} Shallow copy of data array
+   * Get all entities (Synchronous from cache)
+   * Uses cached data loaded via load() or updated via add/update/delete
+   * @returns {Array} Data array copy
    */
   getAll() {
     return this._data.slice();
   }
 
   /**
-   * Get entity by ID
+   * Get entity by ID (Synchronous from cache)
    * @param {string} id - Entity ID
    * @returns {Object|null} Entity or null if not found
    */
@@ -58,99 +51,108 @@ export class BaseRepository {
     return this._data.find(item => item.id === id) || null;
   }
 
-  /**
-   * Add new entity
-   * @param {Object} entity - Entity to add
-   * @returns {Object} Added entity
-   */
-  add(entity) {
-    this._data.push(entity);
-    this._saveToStorage();
-    return entity;
-  }
-
-  /**
-   * Update existing entity
-   * @param {string} id - Entity ID
-   * @param {Object} entity - Updated entity
-   * @returns {boolean} True if updated, false if not found
-   */
-  update(id, entity) {
-    const idx = this._data.findIndex(item => item.id === id);
-    if (idx !== -1) {
-      this._data[idx] = entity;
-      this._saveToStorage();
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Delete entity by ID
-   * @param {string} id - Entity ID
-   * @returns {boolean} True if deleted, false if not found
-   */
-  delete(id) {
-    const before = this._data.length;
-    this._data = this._data.filter(item => item.id !== id);
-    const deleted = this._data.length !== before;
-    if (deleted) this._saveToStorage();
-    return deleted;
-  }
-
-  /**
-   * Delete multiple entities matching predicate
-   * @param {Function} predicate - Filter function
-   * @returns {number} Number of deleted entities
-   */
-  deleteWhere(predicate) {
-    const before = this._data.length;
-    this._data = this._data.filter(item => !predicate(item));
-    const deleted = before - this._data.length;
-    if (deleted > 0) this._saveToStorage();
-    return deleted;
-  }
-
-  /**
-   * Find entities matching predicate
-   * @param {Function} predicate - Filter function
-   * @returns {Array} Matching entities
-   */
   findWhere(predicate) {
     return this._data.filter(predicate);
   }
-
+  
   /**
-   * Clear all data
-   */
-  clear() {
-    this._data = [];
-    this._saveToStorage();
-  }
-
-  /**
-   * Get count of entities
-   * @returns {number}
+   * Count entities
    */
   count() {
     return this._data.length;
   }
 
   /**
-   * Load data from array (for seeding/importing)
-   * @param {Array} data - Array of entities
+   * Add new entity (Async)
+   * @param {Object} entity - Entity to add
+   * @returns {Promise<Object>} Added entity
    */
-  loadData(data) {
-    this._data = Array.isArray(data) ? [...data] : [];
-    this._loaded = true;
-    this._saveToStorage();
+  async add(entity) {
+    try {
+      const response = await fetch(`${API_URL}/${this.endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entity)
+      });
+      if (!response.ok) throw new Error(response.statusText);
+      
+      const saved = await response.json();
+      const idx = this._data.findIndex(item => item.id === saved.id);
+      if (idx !== -1) {
+          this._data[idx] = saved;
+      } else {
+          this._data.push(saved);
+      }
+      return saved;
+    } catch (err) {
+      console.error(`Failed to add ${this.entityName}:`, err);
+      throw err;
+    }
   }
 
   /**
-   * Export data as array
-   * @returns {Array} Copy of data array
+   * Update existing entity (Async)
+   * @param {string} id - Entity ID
+   * @param {Object} entity - Updated entity
+   * @returns {Promise<boolean>} True if updated
    */
+  async update(id, entity) {
+    try {
+      const response = await fetch(`${API_URL}/${this.endpoint}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entity)
+      });
+      if (!response.ok) throw new Error(response.statusText);
+
+      const saved = await response.json();
+      const idx = this._data.findIndex(item => item.id === id);
+      if (idx !== -1) {
+        this._data[idx] = saved;
+      } else {
+         this._data.push(saved);
+      }
+      return true;
+    } catch (err) {
+      console.error(`Failed to update ${this.entityName}:`, err);
+      return false;
+    }
+  }
+
+  /**
+   * Delete entity by ID (Async)
+   * @param {string} id - Entity ID
+   * @returns {Promise<boolean>} True if deleted
+   */
+  async delete(id) {
+    try {
+      const response = await fetch(`${API_URL}/${this.endpoint}/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error(response.statusText);
+
+      const idx = this._data.findIndex(item => item.id === id);
+      if (idx !== -1) {
+         this._data.splice(idx, 1);
+         return true;
+      }
+      return false;
+    } catch (err) {
+      console.error(`Failed to delete ${this.entityName}:`, err);
+      return false;
+    }
+  }
+
+  // Helper for bulk operations locally (used by DataManager before import)
+  loadData(data) {
+    this._data = Array.isArray(data) ? [...data] : [];
+  }
+  
   exportData() {
     return this._data.slice();
+  }
+  
+  clear() {
+    this._data = [];
   }
 }

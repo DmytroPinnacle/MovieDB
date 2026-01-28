@@ -5,7 +5,7 @@
 import { movieRepository } from './dal/index.js';
 
 export function loadMovies() {
-  return movieRepository.getAll();
+  return movieRepository.load();
 }
 
 export function addMovie(movie) {

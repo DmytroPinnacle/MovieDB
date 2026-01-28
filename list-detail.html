@@ -129,11 +129,16 @@
   <main class="layout full-width">
     <section class="panel" style="width: 100%;">
       <div class="detail-header">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <a href="lists.html" class="small secondary">← Back</a>
-          <h2 id="listName">Loading...</h2>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="lists.html" class="small secondary">← Back</a>
+            <h2 id="listName" style="margin: 0;">Loading...</h2>
+          </div>
+          <div id="listDesc" style="color: var(--muted); font-size: 0.9rem;"></div>
         </div>
-        <div class="list-meta" id="listMeta"></div>
+        <div class="list-meta" id="listMeta">
+          <span id="itemCount" class="rating-badge" style="background: #334155; font-size: 0.9rem;"></span>
+        </div>
       </div>
       
       <div class="controls-bar">

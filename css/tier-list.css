@@ -391,7 +391,7 @@
 
 /* Context Menu */
 .context-menu {
-  position: fixed;
+  position: absolute;
   background: #1e293b;
   border: 1px solid #334155;
   border-radius: var(--radius);
@@ -575,4 +575,106 @@
   color: #94a3b8;
   font-size: 0.85rem;
   margin-left: 0.5rem;
+}
+
+/* =========================================
+   Tier List Grid Dynamic Layout (Flexbox) 
+   ========================================= */
+
+.tier-list-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 1.5rem;
+  overflow-x: auto;
+  align-items: flex-start;
+  padding-bottom: 2rem;
+}
+
+.participant-tiers-section {
+    flex: 0 0 450px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.participant-tiers-section h3 {
+    margin: 0;
+    padding: 1rem;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+    text-align: center;
+}
+
+.tiers-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.tier-row {
+    display: flex;
+    border-bottom: 1px solid #334155;
+    min-height: 110px;
+}
+
+.tier-row:last-child {
+    border-bottom: none;
+}
+
+.tier-label {
+    width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    flex-shrink: 0;
+}
+
+/* Ensure F tier exists */
+.tier-F { background: #64748b; color: white; }
+
+.tier-content {
+    flex: 1;
+    padding: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 0.5rem;
+    background: rgba(30, 41, 59, 0.5);
+    transition: background 0.2s;
+}
+
+.tier-content.drag-over {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+.tier-item {
+    width: 60px;
+    height: 90px;
+    position: relative;
+    cursor: grab;
+    transition: transform 0.2s;
+}
+
+.tier-item:hover {
+    transform: scale(1.1);
+    z-index: 5;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.tier-item.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+.tier-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
 }

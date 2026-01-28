@@ -22,13 +22,18 @@ const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 let pendingDeleteId = null;
 
 // Initialize
-function init() {
+async function init() {
   // Ensure modals are closed on page load
   if (tierListModal) tierListModal.close();
   if (deleteModal) deleteModal.close();
   
   // Seed repositories so dropdowns and lists have data
-  initializeSeedData();
+  await initializeSeedData();
+  await Promise.all([
+      tierListRepository.load(),
+      watcherRepository.load(), // Needed for participants maybe?
+      movieRepository.load() // Needed for tier items?
+  ]);
 
   loadTierLists();
   renderTierLists();
@@ -98,33 +103,35 @@ function clearErrors() {
 function displayErrors(errors) {
   clearErrors();
   for (const [field, message] of Object.entries(errors)) {
-    const errorEl = document.querySelector(`[data-error-for="${field}"]`);
+    const errorEl = document.getElementById(`${field}Error`);
     if (errorEl) errorEl.textContent = message;
   }
 }
 
-function handleSave(e) {
+async function handleSave(e) {
   e.preventDefault();
   
   const formData = new FormData(tierListForm);
-  const data = {
-    name: formData.get('name')
+  const name = formData.get('name');
+  
+  const updatedData = {
+    name: name
   };
   
-  const errors = validateTierListFields(data);
+  const errors = validateTierListFields(updatedData);
   if (Object.keys(errors).length > 0) {
     displayErrors(errors);
     return;
   }
   
   if (currentEditId) {
+    // Merge existing
     const existing = tierListRepository.getById(currentEditId);
-    if (existing) {
-      tierListRepository.update(currentEditId, { ...existing, name: data.name.trim(), updatedAt: Date.now() });
-    }
+    const merged = { ...existing, ...updatedData };
+    await tierListRepository.update(currentEditId, merged);
   } else {
-    const newTierList = createTierList(data);
-    tierListRepository.add(newTierList);
+    const newTierList = createTierList(updatedData);
+    await tierListRepository.add(newTierList);
   }
   
   loadTierLists();
@@ -132,8 +139,8 @@ function handleSave(e) {
   closeModal();
 }
 
-function openDeleteModal(tierListId) {
-  pendingDeleteId = tierListId;
+function handleDeleteConfirm(id) {
+  pendingDeleteId = id;
   deleteModal.showModal();
 }
 
@@ -142,143 +149,91 @@ function closeDeleteModal() {
   pendingDeleteId = null;
 }
 
-function handleDelete() {
+async function handleDelete() {
   if (pendingDeleteId) {
-    tierListRepository.delete(pendingDeleteId);
+    await tierListRepository.delete(pendingDeleteId);
     loadTierLists();
     renderTierLists();
+    closeDeleteModal();
   }
-  closeDeleteModal();
 }
 
 function renderTierLists() {
+  tierListsContainer.innerHTML = '';
+  
   if (tierLists.length === 0) {
     tierListsContainer.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">🏆</div>
-        <p>No tier lists yet. Create your first one!</p>
+      <div class="col-12 text-center p-5">
+        <p class="text-muted fs-4">No Tier Lists yet. Creates one!</p>
       </div>
     `;
     return;
   }
   
-  tierListsContainer.innerHTML = tierLists.map(tierList => {
-    // Resolve participants
-    const participantNames = tierList.participantIds
-        .map(id => {
-            const w = watcherRepository.getById(id);
-            return w ? w.firstName : 'Unknown';
-        })
-        .join(', ');
-
-    // Count movies and resolve names
-    const movieCount = tierList.selectedMovieIds.length;
-    let tieredMovieCount = 0;
-    const tieredMovieIds = new Set();
-    
-    // Check tiers for more movies and count
-    if (tierList.tiers) {
-        for (const watcherId of tierList.participantIds) {
-            const watcherTiers = tierList.tiers[watcherId];
-            if (watcherTiers) {
-                for (const tier of ['S', 'A', 'B', 'C', 'D']) {
-                    const ids = watcherTiers[tier] || [];
-                    tieredMovieCount += ids.length;
-                    ids.forEach(id => tieredMovieIds.add(id));
-                }
-            }
-        }
-    }
-
-    const movieNames = Array.from(tieredMovieIds)
-        .map(id => {
-            const m = movieRepository.getById(id);
-            return m ? m.title : 'Unknown';
-        })
-        .join(', ');
-    
-    return `
-      <div class="tier-list-card" data-id="${tierList.id}">
-        <div class="tier-list-card-header">
-          <h3>${escapeHtml(tierList.name)}</h3>
-          <div style="position: relative;">
-            <button class="list-menu-btn" data-id="${tierList.id}">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-            </button>
-            <div class="list-context-menu hidden">
-                <button class="edit-btn" data-id="${tierList.id}">Rename</button>
-                <button class="delete-btn danger" data-id="${tierList.id}">Delete</button>
+  tierLists.forEach(list => {
+    const card = document.createElement('div');
+    card.className = 'col-md-6 col-lg-4 mb-4';
+    card.innerHTML = `
+      <div class="card h-100 tier-list-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <h5 class="card-title text-truncate">
+              <a href="tier-list-detail.html?id=${list.id}" class="text-decoration-none text-dark stretched-link">
+                ${list.name}
+              </a>
+            </h5>
+            <div class="dropdown" style="z-index: 2;">
+              <button class="btn btn-link text-dark p-0 list-menu-btn" type="button">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end list-context-menu shadow hidden">
+                <li><a class="dropdown-item edit-btn" href="#" data-id="${list.id}">Edit</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger delete-btn" href="#" data-id="${list.id}">Delete</a></li>
+              </ul>
             </div>
           </div>
-        </div>
-        <div class="tier-list-info">
-          <p class="truncate-text" title="${participantNames}">👥 ${participantNames || 'No participants'}</p>
-          <div>
-            <div>🎬 ${movieCount} selected, ${tieredMovieCount} tiered</div>
-            ${movieNames ? `<div class="truncate-text movie-preview" title="${movieNames}">${movieNames}</div>` : ''}
-          </div>
-          <p style="font-size: 0.8rem; color: var(--muted);">
-            Created: ${new Date(tierList.createdAt).toLocaleDateString()}
+          <p class="card-text text-muted small">
+            Participants: ${list.participantIds.length}<br>
+            Created: ${new Date(list.createdAt).toLocaleDateString()}
           </p>
+        </div>
+        <div class="card-footer bg-transparent border-top-0">
+          <a href="tier-list-detail.html?id=${list.id}" class="btn btn-sm btn-outline-primary w-100 position-relative" style="z-index: 1;">View Tier List</a>
         </div>
       </div>
     `;
-  }).join('');
-  
-  // Attach event listeners
-  tierListsContainer.querySelectorAll('.tier-list-card').forEach(card => {
-    const id = card.dataset.id;
-    card.addEventListener('click', (e) => {
-      // Don't navigate if clicking menu button or menu items
-      if (!e.target.closest('.list-menu-btn') && !e.target.closest('.list-context-menu')) {
-        window.location.href = `tier-list-detail.html?id=${id}`;
-      }
-    });
-  });
-
-  // Menu toggles
-  tierListsContainer.querySelectorAll('.list-menu-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const menu = btn.nextElementSibling;
-        
-        // Close other menus
-        document.querySelectorAll('.list-context-menu').forEach(el => {
-            if (el !== menu) el.classList.add('hidden');
-        });
-        
-        menu.classList.toggle('hidden');
-    });
-  });
-  
-  tierListsContainer.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    
+    // Wire up events
+    const menuBtn = card.querySelector('.list-menu-btn');
+    const menu = card.querySelector('.list-context-menu');
+    
+    menuBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      // Close menu
-      const menu = btn.closest('.list-context-menu');
-      if (menu) menu.classList.add('hidden');
-
-      openModal(btn.dataset.id);
+      e.preventDefault();
+      // Close others first
+      document.querySelectorAll('.list-context-menu').forEach(el => {
+        if (el !== menu) el.classList.add('hidden');
+      });
+      menu.classList.toggle('hidden');
     });
-  });
-  
-  tierListsContainer.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    
+    card.querySelector('.edit-btn').addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      // Close menu
-      const menu = btn.closest('.list-context-menu');
-      if (menu) menu.classList.add('hidden');
-
-      openDeleteModal(btn.dataset.id);
+      menu.classList.add('hidden');
+      openModal(list.id);
     });
+    
+    card.querySelector('.delete-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      menu.classList.add('hidden');
+      handleDeleteConfirm(list.id);
+    });
+    
+    tierListsContainer.appendChild(card);
   });
 }
 
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-// Start app
-init();
+document.addEventListener('DOMContentLoaded', init);

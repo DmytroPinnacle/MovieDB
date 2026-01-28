@@ -11,103 +11,125 @@ import { SEED_WATCHERS } from './watcher-seed.js';
 import { SEED_SESSIONS } from './session-seed.js';
 
 /**
- * Initialize watchers from seed data
+ * Initialize watchers from seed data (Async)
  */
-export function seedWatchers() {
+export async function seedWatchers() {
+  // Ensure data is loaded to check count
+  if (watcherRepository.count() === 0) {
+      await watcherRepository.load();
+  }
+
   if (watcherRepository.count() > 0) {
     console.info('Watchers already exist, skipping seed.');
     return;
   }
   
-  SEED_WATCHERS.forEach(([firstName, lastName]) => {
+  console.info('Seeding watchers...');
+  const promises = SEED_WATCHERS.map(([firstName, lastName]) => {
     const watcher = createWatcher({ firstName, lastName: lastName || '' });
-    watcherRepository.add(watcher);
+    return watcherRepository.add(watcher);
   });
   
+  await Promise.all(promises);
   console.info(`Seeded ${SEED_WATCHERS.length} watchers.`);
 }
 
 /**
- * Initialize movies from seed data
+ * Initialize movies from seed data (Async)
  */
-export function seedMovies() {
+export async function seedMovies() {
+  // Ensure data loaded
+  if (movieRepository.count() === 0) await movieRepository.load();
+  if (directorRepository.count() === 0) await directorRepository.load();
+
   const existingCount = movieRepository.count();
   
-  SEED_MOVIES.forEach(([title, year, genres, rating, imdbId, posterUrl, kinopoiskId, directorNames]) => {
-    let movie = null;
-    
-    // Check if movie exists
-    if (existingCount > 0) {
+  // We process sequentially to avoid race conditions with creating directors
+  // or use a map to track created directors during the loop
+  
+  // First, ensure all needed directors exist
+  const directorsCache = new Map(); // name -> id
+  // Pre-fill from existing
+  directorRepository.getAll().forEach(d => directorsCache.set(d.name, d.id));
+
+  for (const [title, year, genres, rating, imdbId, posterUrl, kinopoiskId, directorNames] of SEED_MOVIES) {
+      let movie = null;
+      
+      // Check if movie exists locally
       const found = movieRepository.findWhere(m => m.title === title && m.year === year);
       if (found.length > 0) movie = found[0];
-    }
-    
-    // If movie exists and has directors, skip
-    if (movie && movie.directorIds && movie.directorIds.length > 0) {
-      return;
-    }
 
-    // Handle directors
-    const directorIds = [];
-    if (directorNames && Array.isArray(directorNames)) {
-      directorNames.forEach(name => {
-        let director = directorRepository.findWhere(d => d.name === name)[0];
-        if (!director) {
-          director = createDirector({ name });
-          directorRepository.add(director);
-        }
-        directorIds.push(director.id);
-      });
-    }
-
-    if (movie) {
-      // Update existing movie with directors
-      if (directorIds.length > 0) {
-        movie.directorIds = directorIds;
-        movieRepository.update(movie.id, movie);
+      // If movie exists and has directors, skip
+      if (movie && movie.directorIds && movie.directorIds.length > 0) {
+        continue;
       }
-    } else if (existingCount === 0) {
-      // Only create new movies if we are in a fresh seed state
-      // (Prevents re-adding movies user might have deleted if we just ran update)
-      // However, for this fix, we mainly care about updating existing ones.
-      // But let's keep the original behavior: if count=0, add all.
-      
-      const newMovie = createMovie({ 
-        title, 
-        year, 
-        genres: Array.isArray(genres) ? genres : [genres], // Handle both old and new format
-        rating, 
-        posterUrl: posterUrl || '', 
-        notes: '', 
-        imdbId: imdbId || '',
-        kinopoiskId: kinopoiskId || '',
-        directorIds: directorIds
-      });
-      movieRepository.add(newMovie);
-      movie = newMovie;
-    }
 
-    // Update directors with movie ID if we have a movie object
-    if (movie) {
-      directorIds.forEach(dId => {
-        const director = directorRepository.getById(dId);
-        if (director) {
-          if (!director.movieIds.includes(movie.id)) {
-              director.movieIds.push(movie.id);
-              directorRepository.update(dId, director);
+      // Handle directors
+      const directorIds = [];
+      if (directorNames && Array.isArray(directorNames)) {
+          for (const name of directorNames) {
+              let dId = directorsCache.get(name);
+              if (!dId) {
+                  // Double check repo
+                  const existingD = directorRepository.findWhere(d => d.name === name)[0];
+                  if (existingD) {
+                      dId = existingD.id;
+                  } else {
+                      const newDirector = createDirector({ name });
+                      await directorRepository.add(newDirector);
+                      dId = newDirector.id;
+                  }
+                  directorsCache.set(name, dId);
+              }
+              directorIds.push(dId);
           }
-        }
-      });
-    }
-  });
+      }
+
+      if (movie) {
+          // Update existing movie with directors
+          if (directorIds.length > 0) {
+              movie.directorIds = directorIds;
+              await movieRepository.update(movie.id, movie);
+          }
+      } else if (existingCount === 0) {
+          const newMovie = createMovie({ 
+              title, 
+              year, 
+              genres: Array.isArray(genres) ? genres : [genres],
+              rating, 
+              posterUrl: posterUrl || '', 
+              notes: '', 
+              imdbId: imdbId || '',
+              kinopoiskId: kinopoiskId || '',
+              directorIds: directorIds
+          });
+          await movieRepository.add(newMovie);
+          movie = newMovie;
+      }
+
+      // Update directors with movie ID
+      if (movie && directorIds.length > 0) {
+          for (const dId of directorIds) {
+              // We need to fetch director again or check cache object reference?
+              // The cache only stores ID. Get object from repo (now in _data)
+              const director = directorRepository.getById(dId);
+              if (director && !director.movieIds.includes(movie.id)) {
+                  director.movieIds.push(movie.id);
+                  await directorRepository.update(dId, director);
+              }
+          }
+      }
+  }
   
-  console.info(`Processed seed movies. Existing count: ${existingCount}`);
+  console.info(`Processed seed movies.`);
 }
 
 /**
- * Initialize sessions from seed data
+ * Initialize sessions from seed data (Async)
  */
-export function seedSessions() {
+export async function seedSessions() {
+  if (sessionRepository.count() === 0) await sessionRepository.load();
+
   if (sessionRepository.count() > 0) {
     console.info('Sessions already exist, skipping seed.');
     return;
@@ -121,15 +143,15 @@ export function seedSessions() {
     return;
   }
   
-  SEED_SESSIONS.forEach(([movieIdx, watcherIdxs, dateStr, notes, ratings]) => {
-    if (movieIdx >= movies.length) return;
+  const promises = SEED_SESSIONS.map(([movieIdx, watcherIdxs, dateStr, notes, ratings]) => {
+    if (movieIdx >= movies.length) return Promise.resolve();
     
     const movie = movies[movieIdx];
     const watcherIds = watcherIdxs
       .filter(idx => idx < watchers.length)
       .map(idx => watchers[idx].id);
     
-    if (watcherIds.length === 0) return;
+    if (watcherIds.length === 0) return Promise.resolve();
     
     // Convert date string to timestamp
     const [year, month, day] = dateStr.split('-').map(Number);
@@ -152,17 +174,18 @@ export function seedSessions() {
       watcherRatings: watcherRatings
     });
     
-    sessionRepository.add(session);
+    return sessionRepository.add(session);
   });
   
+  await Promise.all(promises);
   console.info(`Seeded ${SEED_SESSIONS.length} watching sessions.`);
 }
 
 /**
- * Initialize all seed data
+ * Initialize all seed data (Async)
  */
-export function initializeSeedData() {
-  seedWatchers();
-  seedMovies();
-  seedSessions();
+export async function initializeSeedData() {
+  await seedWatchers();
+  await seedMovies();
+  await seedSessions();
 }

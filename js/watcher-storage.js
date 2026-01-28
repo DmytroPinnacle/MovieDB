@@ -5,7 +5,7 @@
 import { watcherRepository } from './dal/index.js';
 
 export function loadWatchers() {
-  return watcherRepository.getAll();
+  return watcherRepository.load();
 }
 
 export function addWatcher(watcher) {

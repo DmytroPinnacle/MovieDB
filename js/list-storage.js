@@ -1,5 +1,9 @@
 import { listRepository } from './dal/index.js';
 
+export function loadLists() {
+  return listRepository.load();
+}
+
 export function getLists() {
   return listRepository.getAll();
 }

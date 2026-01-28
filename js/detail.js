@@ -577,10 +577,10 @@ function handleDeleteMovie(movie) {
   }
 }
 
-function init() {
-  initializeSeedData(); // Initialize seed data if needed
-  loadWatchers(); // Load watchers data
-  loadSessions(); // Load sessions data
+async function init() {
+  await initializeSeedData(); // Initialize seed data if needed
+  await loadWatchers(); // Load watchers data
+  await loadSessions(); // Load sessions data
   const movieId = getMovieIdFromURL();
   
   if (!movieId) {
@@ -588,7 +588,7 @@ function init() {
     return;
   }
   
-  const movies = loadMovies();
+  const movies = await loadMovies();
   const movie = movies.find(m => m.id === movieId);
   
   if (!movie) {

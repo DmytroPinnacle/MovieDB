@@ -1,0 +1,43 @@
+# Tier List Detail Page - Business Requirements Summary
+
+## 1. Participant Management
+- **Add Participant:**
+  - A dropdown menu must list available Watchers who are not yet participants in the current Tier List.
+  - Clicking "Add" adds the watcher to the list and initializes their tier board.
+- **Display:**
+  - Participants' tier boards must be displayed horizontally side-by-side (flex row layout).
+  - The participant's header must display their name only (e.g., "John Doe").
+- **Remove Participant:**
+  - A "three dots" (⋮) menu button must appear in the participant's header (visible on hover/interaction).
+  - This menu must contain a "Remove" option to remove the participant from the tier list view.
+
+## 2. Tier Board Structure & Interaction
+- **Tiers:** Standard tiers S, A, B, C, D, F must be supported.
+- **Drag & Drop Rules:**
+  - **Pool to Tier:** Allowed. Users can drag movies from the Movie Pool to a specific tier.
+    - *Constraint:* Blocked if the movie is already ranked by that specific participant.
+  - **Tier to Tier (Same Participant):** Allowed. Users can move movies between tiers within the same participant's board (re-ranking).
+  - **Participant into Participant:** **Blocked**. Users cannot drag a movie from Participant A's board to Participant B's board.
+
+## 3. Movie Pool (Selection) Logic
+- **Filtering:** Users can filter movies by Search term, Genre, Watcher (seen by), and Director.
+- **Adding:** 
+  - Clicking "Add" moves matches to the "Movie Pool" (Selection Grid) without page reload.
+  - Feedback is provided via console logs (no alert popups).
+- **Visibility (The "Ranked by All" Rule):**
+  - A movie remains visible in the Movie Pool as long as there is **at least one** participant who hasn't ranked it yet.
+  - The movie **disappears** from the Movie Pool only when it has been ranked by **ALL** current participants.
+  - Reappears if a participant unranks it or if a new participant (who hasn't ranked it) is added.
+- **UI:** Display a placeholder image if the movie poster fails to load.
+
+## 4. Context Menu (Right-Click)
+- **General Behavior:**
+  - Replaces default browser context menu on movie items.
+  - Must appear exactly at the mouse cursor position.
+  - Must close automatically when scrolling the page or clicking elsewhere.
+- **Actions:**
+  - **When Valid on Tier Item:** Show "Unrank (Remove from Tier)". Removes the movie from that specific participant's tier list.
+  - **When Valid on Pool Item (or Tier Item):** Show "Remove from Pool".
+- **Remove from Pool Logic:**
+  - **If Unranked:** Remove immediately from the "Selected Movies" (Pool) without confirmation.
+  - **If Ranked (in any tier):** Display a confirmation dialog warning that this action will remove the movie from **ALL** tier lists and the pool. If confirmed, execute full removal.

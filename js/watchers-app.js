@@ -4,7 +4,7 @@
  */
 
 import { createWatcher, validateWatcherFields, updateWatcher, getWatcherFullName } from './watcher-models.js';
-import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatchers, toggleFavorite, isFavorite, getFavorites } from './watcher-storage.js';
+import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatchers, toggleFavorite, isFavorite, getFavorites, getWatchersSortedByFavorites } from './watcher-storage.js';
 import { initializeSeedData } from './DataSeed/initializer.js';
 
 // ===== STATE MANAGEMENT =====
@@ -25,9 +25,13 @@ const watcherCount = document.getElementById('watcherCount');
 const searchInput = document.getElementById('searchInput');
 
 // ===== INITIALIZATION =====
-function init() {
-  initializeSeedData(); // Initialize seed data if needed
-  loadWatchers();
+async function init() {
+  try {
+    await initializeSeedData(); 
+    await loadWatchers();
+  } catch (err) {
+    console.error("Initialization failed", err);
+  }
   renderWatchers();
   attachEventListeners();
 }
@@ -64,15 +68,15 @@ function handleFormSubmit(e) {
   }
 }
 
-function handleCreate(formData) {
+async function handleCreate(formData) {
   const newWatcher = createWatcher(formData);
-  addWatcher(newWatcher);
+  await addWatcher(newWatcher);
   renderWatchers();
   resetForm();
   highlightWatcher(newWatcher.id);
 }
 
-function handleUpdate(formData) {
+async function handleUpdate(formData) {
   const watchers = getWatchers();
   const originalWatcher = watchers.find(w => w.id === currentEditId);
   
@@ -82,7 +86,7 @@ function handleUpdate(formData) {
   }
   
   const updatedWatcher = updateWatcher(originalWatcher, formData);
-  updateWatcherInStore(currentEditId, updatedWatcher);
+  await updateWatcherInStore(currentEditId, updatedWatcher);
   renderWatchers();
   resetForm();
   highlightWatcher(updatedWatcher.id);
@@ -105,211 +109,166 @@ function filterWatchers(watchers) {
 
 // ===== RENDERING =====
 function renderWatchers() {
-  const watchers = getWatchers();
-  const filtered = filterWatchers(watchers);
+  const allWatchers = getWatchersSortedByFavorites();
+  const filteredWatchers = filterWatchers(allWatchers);
   
-  // Update count
-  updateWatcherCount(filtered.length, watchers.length);
+  // Update counts
+  if (watcherCount) {
+    watcherCount.textContent = `${filteredWatchers.length} Watcher${filteredWatchers.length !== 1 ? 's' : ''}`;
+  }
   
-  // Show/hide empty message
-  if (filtered.length === 0) {
-    watcherList.classList.add('hidden');
+  // Empty state
+  if (filteredWatchers.length === 0) {
+    watcherList.innerHTML = '';
     emptyMessage.classList.remove('hidden');
-    emptyMessage.textContent = searchTerm 
-      ? 'No watchers match your search.' 
-      : 'No watchers found. Add your first watcher!';
     return;
   }
   
-  watcherList.classList.remove('hidden');
   emptyMessage.classList.add('hidden');
+  watcherList.innerHTML = '';
   
-  // Sort: favorites first (in selection order), then alphabetically by name
-  const favorites = [];
-  const nonFavorites = [];
+  const fragment = document.createDocumentFragment();
   
-  filtered.forEach(watcher => {
-    if (isFavorite(watcher.id)) {
-      favorites.push(watcher);
-    } else {
-      nonFavorites.push(watcher);
-    }
+  filteredWatchers.forEach(watcher => {
+    const item = createWatcherItem(watcher);
+    fragment.appendChild(item);
   });
   
-  // Sort non-favorites alphabetically
-  nonFavorites.sort((a, b) => 
-    getWatcherFullName(a).localeCompare(getWatcherFullName(b))
-  );
-  
-  // Favorites maintain their selection order (from storage)
-  const favoriteIds = getFavorites();
-  favorites.sort((a, b) => {
-    return favoriteIds.indexOf(a.id) - favoriteIds.indexOf(b.id);
-  });
-  
-  const sorted = [...favorites, ...nonFavorites];
-  
-  // Render list items
-  watcherList.innerHTML = sorted.map(watcher => createWatcherItem(watcher)).join('');
-  
-  // Attach event listeners to action buttons
-  attachListItemListeners();
+  watcherList.appendChild(fragment);
 }
 
 function createWatcherItem(watcher) {
+  const li = document.createElement('li');
+  // Logic to highlight active item if needed
+  const isActive = currentEditId === watcher.id ? 'border-primary' : '';
+  li.className = `watcher-item ${isActive}`;
+  li.id = `card-${watcher.id}`;
+  
   const fullName = getWatcherFullName(watcher);
-  const createdDate = new Date(watcher.createdAt).toLocaleDateString();
-  const wasUpdated = watcher.updatedAt !== watcher.createdAt;
-  const updatedDate = wasUpdated ? new Date(watcher.updatedAt).toLocaleDateString() : null;
-  const isFav = isFavorite(watcher.id);
+  const favoriteClass = isFavorite(watcher.id) ? 'active' : '';
+  const starIcon = isFavorite(watcher.id) ? '★' : '☆';
   
-  return `
-    <li class="watcher-item" data-id="${watcher.id}">
-      <a href="watcher-detail.html?id=${watcher.id}" class="watcher-info watcher-link">
-        <h3 class="watcher-name">${escapeHtml(fullName)}</h3>
-        <p class="watcher-meta">
-          Added: ${createdDate}
-          ${wasUpdated ? `• Updated: ${updatedDate}` : ''}
-        </p>
+  li.innerHTML = `
+    <div class="watcher-info">
+      <a href="watcher-detail.html?id=${watcher.id}" class="watcher-link" title="View details">
+        <h3 class="watcher-name">${fullName}</h3>
+        <p class="watcher-meta">ID: ${watcher.id.substring(0, 8)}...</p>
       </a>
-      <div class="watcher-actions">
-        <button class="small ${isFav ? 'primary' : 'secondary'} favorite-btn" data-id="${watcher.id}" aria-label="${isFav ? 'Remove from' : 'Add to'} favorites" title="${isFav ? 'Remove from' : 'Add to'} favorites">
-          ${isFav ? '⭐' : '☆'}
-        </button>
-        <button class="small secondary edit-btn" data-id="${watcher.id}" aria-label="Edit ${escapeHtml(fullName)}">
-          ✏️ Edit
-        </button>
-        <button class="small danger delete-btn" data-id="${watcher.id}" aria-label="Delete ${escapeHtml(fullName)}">
-          🗑️ Delete
-        </button>
-      </div>
-    </li>
+    </div>
+    <div class="watcher-actions">
+      <button class="small secondary favorite-btn ${favoriteClass}" title="Toggle Favorite">${starIcon}</button>
+      <button class="small secondary edit-btn">Edit</button>
+      <button class="small danger delete-btn">Delete</button>
+    </div>
   `;
+  
+  // Attach event listeners
+  const editBtn = li.querySelector('.edit-btn');
+  editBtn.addEventListener('click', () => populateForm(watcher));
+  
+  const deleteBtn = li.querySelector('.delete-btn');
+  deleteBtn.addEventListener('click', () => confirmDelete(watcher.id));
+  
+  const favoriteBtn = li.querySelector('.favorite-btn');
+  favoriteBtn.addEventListener('click', (e) => handleToggleFavorite(e, watcher.id));
+  
+  return li;
 }
 
-function attachListItemListeners() {
-  // Favorite buttons
-  document.querySelectorAll('.favorite-btn').forEach(btn => {
-    btn.addEventListener('click', handleToggleFavorite);
-  });
-  
-  // Edit buttons
-  document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', handleEdit);
-  });
-  
-  // Delete buttons
-  document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', handleDelete);
-  });
+function getInitials(watcher) {
+  return (watcher.firstName.charAt(0) + (watcher.lastName ? watcher.lastName.charAt(0) : '')).toUpperCase();
 }
 
-function updateWatcherCount(displayedCount, totalCount) {
-  const text = displayedCount === totalCount
-    ? `${totalCount} watcher${totalCount !== 1 ? 's' : ''}`
-    : `${displayedCount} of ${totalCount} watcher${totalCount !== 1 ? 's' : ''}`;
-  watcherCount.textContent = text;
+function getAvatarColor(id) {
+  // Generate a consistent color based on ID
+  const colors = ['bg-primary', 'bg-secondary', 'bg-success', 'bg-danger', 'bg-warning', 'bg-info', 'bg-dark'];
+  const index = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+  return colors[index];
 }
 
-// ===== EDIT / DELETE HANDLERS =====
-function handleEdit(e) {
-  const watcherId = e.currentTarget.dataset.id;
-  const watchers = getWatchers();
-  const watcher = watchers.find(w => w.id === watcherId);
-  
-  if (!watcher) return;
-  
-  // Populate form with watcher data
-  currentEditId = watcherId;
-  editingIdInput.value = watcherId;
+// ===== UI HELPERS =====
+function populateForm(watcher) {
   firstNameInput.value = watcher.firstName;
   lastNameInput.value = watcher.lastName || '';
+  editingIdInput.value = watcher.id;
+  currentEditId = watcher.id;
   
-  // Update UI to show edit mode
   formTitle.textContent = 'Edit Watcher';
   submitBtn.textContent = 'Update Watcher';
   cancelBtn.classList.remove('hidden');
   
-  // Focus first input
-  firstNameInput.focus();
-  
-  // Scroll to form on mobile
-  if (window.innerWidth <= 900) {
-    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  // Scroll to form
+  form.scrollIntoView({ behavior: 'smooth' });
 }
 
-function handleToggleFavorite(e) {
-  const watcherId = e.currentTarget.dataset.id;
-  toggleFavorite(watcherId);
-  renderWatchers();
-}
-
-function handleDelete(e) {
-  const watcherId = e.currentTarget.dataset.id;
-  const watchers = getWatchers();
-  const watcher = watchers.find(w => w.id === watcherId);
-  
-  if (!watcher) return;
-  
-  const fullName = getWatcherFullName(watcher);
-  const confirmed = confirm(`Are you sure you want to delete "${fullName}"?`);
-  
-  if (!confirmed) return;
-  
-  deleteWatcher(watcherId);
-  renderWatchers();
-  
-  // If we were editing this watcher, reset the form
-  if (currentEditId === watcherId) {
-    resetForm();
-  }
-}
-
-// ===== FORM UTILITIES =====
 function resetForm() {
   form.reset();
   currentEditId = null;
   editingIdInput.value = '';
-  formTitle.textContent = 'Add Watcher';
+  formTitle.textContent = 'Add New Watcher';
   submitBtn.textContent = 'Add Watcher';
   cancelBtn.classList.add('hidden');
   clearErrors();
+  
+  // Remove highlighting
+  document.querySelectorAll('.watcher-card').forEach(c => c.classList.remove('border-primary'));
+}
+
+async function confirmDelete(id) {
+  if (confirm('Are you sure you want to delete this watcher? This action cannot be undone.')) {
+    await deleteWatcher(id);
+    renderWatchers();
+    // If we were editing this one, reset form
+    if (currentEditId === id) {
+      resetForm();
+    }
+  }
+}
+
+function handleToggleFavorite(e, id) {
+  e.stopPropagation(); // Prevent row click or other events
+  const isNowFav = toggleFavorite(id);
+  
+  // Re-render to update sorting
+  renderWatchers();
+}
+
+function highlightWatcher(id) {
+  const card = document.getElementById(`card-${id}`);
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('border-primary');
+    // Remove highlight after animation
+    setTimeout(() => {
+        if(currentEditId !== id) {
+            card.classList.remove('border-primary');
+        }
+    }, 2000);
+  }
+}
+
+// ===== ERROR HANDLING =====
+function displayErrors(errors) {
+  // Clear previous errors
+  clearErrors();
+  
+  // Display new errors
+  Object.keys(errors).forEach(field => {
+    const input = document.getElementById(field);
+    if (input) {
+      input.classList.add('is-invalid');
+      const feedback = document.createElement('div');
+      feedback.className = 'invalid-feedback';
+      feedback.textContent = errors[field];
+      input.parentNode.appendChild(feedback);
+    }
+  });
 }
 
 function clearErrors() {
-  document.querySelectorAll('.error').forEach(el => {
-    el.textContent = '';
-  });
+  document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+  document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
 }
 
-function displayErrors(errors) {
-  Object.keys(errors).forEach(fieldName => {
-    const errorElement = document.querySelector(`[data-error-for="${fieldName}"]`);
-    if (errorElement) {
-      errorElement.textContent = errors[fieldName];
-    }
-  });
-}
-
-// ===== VISUAL FEEDBACK =====
-function highlightWatcher(watcherId) {
-  // Add highlight animation to newly created/updated item
-  setTimeout(() => {
-    const item = document.querySelector(`.watcher-item[data-id="${watcherId}"]`);
-    if (item) {
-      item.classList.add('highlight');
-      item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, 100);
-}
-
-// ===== UTILITY FUNCTIONS =====
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-// ===== START APPLICATION =====
-init();
+// Start app
+document.addEventListener('DOMContentLoaded', init);

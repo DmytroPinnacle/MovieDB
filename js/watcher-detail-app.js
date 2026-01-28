@@ -1,10 +1,10 @@
 // Watcher Detail Page Application
 console.log('=== Watcher Detail App Starting ===');
 
-import { getWatcherById } from './watcher-storage.js';
+import { getWatcherById, loadWatchers } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
-import { getSessionsByWatcherId, getWatchedMovieIdsByWatcherId } from './session-storage.js';
-import { loadMovies } from './storage.js';
+import { getSessionsByWatcherId, getWatchedMovieIdsByWatcherId, loadSessions } from './session-storage.js';
+import { loadMovies, getMovies } from './storage.js';
 import { initializeSeedData } from './DataSeed/initializer.js';
 
 console.log('All imports successful');
@@ -75,9 +75,10 @@ let movieYearTo = null;
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Initialize the page
-function init() {
+async function init() {
   console.log('init() called');
-  initializeSeedData(); // Initialize seed data if needed
+  await initializeSeedData(); // Initialize seed data (Async)
+  
   try {
     console.log('watcherId:', watcherId);
     if (!watcherId) {
@@ -85,6 +86,14 @@ function init() {
       showError('No watcher ID provided');
       return;
     }
+
+    // Load data async
+    await Promise.all([
+        loadWatchers(),
+        loadSessions(),
+        loadMovies()
+    ]);
+    allMovies = getMovies();
 
     // Load data
     console.log('Attempting to get watcher by ID...');
@@ -99,9 +108,7 @@ function init() {
       return;
     }
 
-    console.log('Loading movies...');
-    allMovies = loadMovies();
-    console.log('Loaded movies:', allMovies.length);
+    console.log('Movies loaded:', allMovies.length);
     
     console.log('Loading sessions for watcher...');
     allSessions = getSessionsByWatcherId(watcherId);

@@ -1,1 +1,15 @@
 .env
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# SQLite Database
+*.sqlite
+*.sqlite-journal
+*.db
+
+# OS generated files
+.DS_Store
+Thumbs.db

@@ -16,7 +16,7 @@ function dateStringToTimestamp(dateString) {
 }
 
 export function loadSessions() {
-  return sessionRepository.getAll();
+  return sessionRepository.load();
 }
 
 export function getSessions() {

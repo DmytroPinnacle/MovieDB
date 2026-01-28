@@ -7,7 +7,7 @@ import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatch
 import { createWatcher, validateWatcherFields, updateWatcher as mergeWatcher, getWatcherFullName } from './watcher-models.js';
 import { loadSessions, addSession, getSessions } from './session-storage.js';
 import { createSession } from './session-models.js';
-import { getLists } from './list-storage.js';
+import { getLists, loadLists } from './list-storage.js';
 import { initializeSeedData } from './DataSeed/initializer.js';
 import { GenreDropdown } from './genre-dropdown.js';
 import { DirectorDropdown } from './director-dropdown.js';
@@ -34,14 +34,18 @@ let movieDirectorDropdown = null;
 // Use 'trilogy' or your own key. Limit: 1000 requests/day
 const omdbService = new OmdbService('trilogy');
 
-function init() {
+async function init() {
   // Initialize seed data if needed
-  initializeSeedData();
+  await initializeSeedData();
   
   // Load data into UI
-  loadWatchers();
-  loadMovies();
-  loadSessions();
+  await Promise.all([
+    loadWatchers(),
+    loadMovies(),
+    loadSessions(),
+    loadLists(),
+    directorRepository.load()
+  ]);
   
   // Initialize genre dropdown
   genreDropdown = new GenreDropdown('genreDropdown', {
@@ -155,6 +159,7 @@ function wireEvents() {
       watcherDropdown.classList.add('hidden');
     }
   });
+
   // Multi-select list filter events
   const listMultiselect = qs('#filterList');
   const listSelectedDisplay = listMultiselect.querySelector('.multiselect-selected');
@@ -240,16 +245,16 @@ function wireEvents() {
             if (currentDirectors.length === 0) {
                 const names = data.director.split(',').map(d => d.trim());
                 const newIds = [];
-                const allDirectors = directorRepository.getAll();
+                const allDirectors = directorRepository.getAll(); // Sync from cache
                 
-                names.forEach(name => {
+                for (const name of names) {
                     let dir = allDirectors.find(d => d.name.toLowerCase() === name.toLowerCase());
                     if (!dir) {
                         dir = createDirector({ name });
-                        directorRepository.add(dir);
+                        await directorRepository.add(dir);
                     }
                     newIds.push(dir.id);
-                });
+                }
                 movieDirectorDropdown.setSelection(newIds);
             }
         }
@@ -297,7 +302,6 @@ function wireEvents() {
     const watcherNames = viewState.watchers.map(id => {
       const watcher = getWatchers().find(w => w.id === id);
       if (!watcher) return null;
-      // Format as 'FirstName L.' if lastName exists, otherwise just 'FirstName'
       if (watcher.lastName && watcher.lastName.trim()) {
         return `${watcher.firstName} ${watcher.lastName.charAt(0)}.`;
       }
@@ -338,7 +342,7 @@ function wireEvents() {
   qs('#cancelWatcherEditBtn').addEventListener('click', () => { resetWatcherForm(); showErrors({}); });
 
   // Event delegation for watcher list actions
-  qs('#watcherList').addEventListener('click', (e) => {
+  qs('#watcherList').addEventListener('click', async (e) => {
     const item = e.target.closest('.watcher-item');
     if (!item) return;
     const id = item.dataset.id;
@@ -356,22 +360,22 @@ function wireEvents() {
           return;
         }
         // Remove watcher from movies
-        moviesWithWatcher.forEach(movie => {
+        await Promise.all(moviesWithWatcher.map(movie => {
           const updatedWatcherIds = movie.watcherIds.filter(wId => wId !== id);
           const updated = { ...movie, watcherIds: updatedWatcherIds };
-          updateMovieInStore(movie.id, updated);
-        });
+          return updateMovieInStore(movie.id, updated);
+        }));
       } else {
         if (!confirm('Delete this watcher?')) return;
       }
-      deleteWatcher(id);
+      await deleteWatcher(id);
       renderWatcherList();
       renderMovieList(viewState);
     }
   });
 }
 
-function onSubmitForm(e) {
+async function onSubmitForm(e) {
   e.preventDefault();
   const form = e.target;
   const formData = new FormData(form);
@@ -387,7 +391,7 @@ function onSubmitForm(e) {
   if (Object.keys(errors).length) return;
 
   const movie = createMovie(fields);
-  addMovie(movie);
+  await addMovie(movie);
   resetForm();
   // Reset genre dropdown
   genreDropdown.setSelectedGenres([]);
@@ -398,7 +402,7 @@ function onSubmitForm(e) {
   qs('#title').focus();
 }
 
-function onSubmitWatcherForm(e) {
+async function onSubmitWatcherForm(e) {
   e.preventDefault();
   const form = e.target;
   const fields = Object.fromEntries(new FormData(form).entries());
@@ -412,10 +416,10 @@ function onSubmitWatcherForm(e) {
     const existing = getWatchers().find(w => w.id === id);
     if (!existing) return;
     const updated = mergeWatcher(existing, fields);
-    updateWatcherInStore(id, updated);
+    await updateWatcherInStore(id, updated);
   } else {
     const watcher = createWatcher(fields);
-    addWatcher(watcher);
+    await addWatcher(watcher);
   }
   resetWatcherForm();
   renderWatcherList();

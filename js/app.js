@@ -258,7 +258,12 @@ function wireEvents() {
   }
 
   form.addEventListener('submit', onSubmitForm);
-  form.addEventListener('reset', () => setTimeout(()=> showErrors({}), 0));
+  form.addEventListener('reset', () => {
+    setTimeout(()=> showErrors({}), 0);
+    // Clear custom dropdowns
+    if (genreDropdown) genreDropdown.setSelectedGenres([]);
+    if (movieDirectorDropdown) movieDirectorDropdown.setSelection([]);
+  });
   
   function updateListDisplay() {
     const listNames = viewState.lists.map(id => {

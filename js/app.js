@@ -382,6 +382,16 @@ async function onSubmitForm(e) {
   fields.directorIds = movieDirectorDropdown.getSelectedIds();
   
   const errors = validateMovieFields(fields);
+
+  // Check for duplicate IMDB ID
+  if (fields.imdbId && fields.imdbId.trim()) {
+    const imdbId = fields.imdbId.trim();
+    const existing = getMovies().find(m => m.imdbId === imdbId);
+    if (existing) {
+      errors.imdbId = 'Movie with this IMDB ID already exists';
+    }
+  }
+
   showErrors(errors);
   if (Object.keys(errors).length) return;
 

@@ -183,9 +183,14 @@ export async function seedSessions() {
 
 /**
  * Initialize all seed data (Async)
+ * @param {Object} options - Options for seeding
+ * @param {boolean} options.movies - Seed movies
+ * @param {boolean} options.watchers - Seed watchers
+ * @param {boolean} options.sessions - Seed sessions
  */
-export async function initializeSeedData() {
-  await seedWatchers();
-  await seedMovies();
-  await seedSessions();
+export async function initializeSeedData(options = {}) {
+  const { movies = true, watchers = true, sessions = true } = options;
+  if (watchers) await seedWatchers();
+  if (movies) await seedMovies();
+  if (sessions) await seedSessions();
 }

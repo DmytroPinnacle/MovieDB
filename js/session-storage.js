@@ -40,8 +40,7 @@ export function addSession(session) {
 }
 
 export function updateSessionInStore(id, updatedSession) {
-  sessionRepository.update(id, updatedSession);
-  return updatedSession;
+  return sessionRepository.update(id, updatedSession);
 }
 
 export function deleteSession(id) {

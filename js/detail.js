@@ -173,6 +173,15 @@ function renderSessionsSection(movieId) {
         const day = String(sessionDate.getDate()).padStart(2, '0');
         const formattedDate = `${year}-${month}-${day}`;
         
+        // Build reviews HTML
+        const reviewsHtml = (session.watcherIds || []).map(id => {
+          const watcher = getWatcherById(id);
+          const review = session.watcherReviews && session.watcherReviews[id];
+          if (!watcher || !review) return '';
+          const firstLine = escapeHtml(review.split('\n')[0]);
+          return `<div class="session-watcher-review"><strong>${escapeHtml(watcher.firstName)}:</strong> ${firstLine}</div>`;
+        }).filter(Boolean).join('');
+        
         return `
           <div class="session-item" data-session-id="${session.id}">
             <div class="session-header">
@@ -184,6 +193,7 @@ function renderSessionsSection(movieId) {
               </div>
             </div>
             ${session.notes ? `<div class="session-notes">${escapeHtml(session.notes)}</div>` : ''}
+            ${reviewsHtml ? `<div class="session-reviews">${reviewsHtml}</div>` : ''}
           </div>
         `;
       }).join('')
@@ -217,10 +227,13 @@ function renderSessionsSection(movieId) {
             </div>
           </div>
           <div class="field">
-            <label for="sessionNotes">Session Notes (optional)</label>
+            <label for="sessionNotes">Session Notes</label>
             <textarea id="sessionNotes" name="notes" rows="3" maxlength="1000"></textarea>
             <small class="help">Personal notes about this watching session (max 1000 chars)</small>
             <small class="error" data-error-for="notes"></small>
+          </div>
+          <div id="watcherReviewsContainer" class="watcher-reviews-container hidden">
+            <!-- Dynamically populated with review inputs -->
           </div>
           <div class="actions">
             <button type="submit" class="primary save-session-btn">Save Session</button>
@@ -268,12 +281,16 @@ function showSessionForm(movieId, session = null) {
       placeholder: 'Select watchers...',
       onChange: () => {
         const currentRatings = getCurrentRatingsFromDOM();
+        const currentReviews = getCurrentReviewsFromDOM();
         renderWatcherRatings(currentRatings);
+        renderWatcherReviews(currentReviews);
       }
     });
     
     // Render rating inputs for selected watchers
     renderWatcherRatings(session.watcherRatings || {});
+    // Render review inputs for selected watchers
+    renderWatcherReviews(session.watcherReviews || {});
     
     container.querySelector('.save-session-btn').textContent = 'Update Session';
   } else {
@@ -288,12 +305,16 @@ function showSessionForm(movieId, session = null) {
       placeholder: 'Select watchers...',
       onChange: () => {
         const currentRatings = getCurrentRatingsFromDOM();
+        const currentReviews = getCurrentReviewsFromDOM();
         renderWatcherRatings(currentRatings);
+        renderWatcherReviews(currentReviews);
       }
     });
     
     // Clear rating inputs
     renderWatcherRatings({});
+    // Clear review inputs
+    renderWatcherReviews({});
     
     container.querySelector('.save-session-btn').textContent = 'Save Session';
   }
@@ -314,6 +335,19 @@ function getCurrentRatingsFromDOM() {
     }
   });
   return ratings;
+}
+
+function getCurrentReviewsFromDOM() {
+  const reviews = {};
+  const reviewInputs = document.querySelectorAll('.watcher-review-input');
+  reviewInputs.forEach(input => {
+    const watcherId = input.dataset.watcherId;
+    const review = input.value.trim();
+    if (review) {
+      reviews[watcherId] = review;
+    }
+  });
+  return reviews;
 }
 
 function renderWatcherRatings(existingRatings = {}) {
@@ -354,6 +388,190 @@ function renderWatcherRatings(existingRatings = {}) {
   
   // Attach star click handlers
   attachStarRatingHandlers();
+}
+
+function renderWatcherReviews(existingReviews = {}) {
+  const container = document.getElementById('watcherReviewsContainer');
+  if (!sessionWatcherDropdown) {
+    container.classList.add('hidden');
+    return;
+  }
+  
+  const selectedIds = sessionWatcherDropdown.getSelectedIds();
+  
+  if (selectedIds.length === 0) {
+    container.classList.add('hidden');
+    container.innerHTML = '';
+    return;
+  }
+  
+  container.classList.remove('hidden');
+  
+  // Separate watchers into those with and without reviews
+  const watchersWithReviews = [];
+  const watchersWithoutReviews = [];
+  
+  selectedIds.forEach(watcherId => {
+    const watcher = getWatcherById(watcherId);
+    if (!watcher) return;
+    if (existingReviews[watcherId]) {
+      watchersWithReviews.push({ id: watcherId, name: watcher.firstName, review: existingReviews[watcherId] });
+    } else {
+      watchersWithoutReviews.push({ id: watcherId, name: watcher.firstName });
+    }
+  });
+  
+  const reviewsHtml = watchersWithReviews.map(w => `
+    <div class="watcher-review-row" data-watcher-id="${w.id}">
+      <div class="watcher-review-header">
+        <span class="watcher-review-name">${escapeHtml(w.name)}'s review</span>
+        <button type="button" class="remove-review-btn" data-watcher-id="${w.id}" aria-label="Remove ${w.name}'s review">&times;</button>
+      </div>
+      <textarea class="watcher-review-input" id="review-${w.id}" data-watcher-id="${w.id}" rows="3" maxlength="500"></textarea>
+    </div>
+  `).join('');
+  
+  const addReviewsHtml = watchersWithoutReviews.length > 0 ? `
+    <div class="add-reviews-section">
+      <span class="add-reviews-label">Add review for:</span>
+      <div class="add-review-buttons">
+        ${watchersWithoutReviews.map(w => `
+          <button type="button" class="add-review-btn" data-watcher-id="${w.id}">${escapeHtml(w.name)}</button>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+  
+  container.innerHTML = `
+    <div class="reviews-section-header" role="button" tabindex="0" aria-expanded="false">
+      <span class="reviews-toggle-icon">▶</span>
+      <span class="reviews-header-label">Watcher Reviews${watchersWithReviews.length > 0 ? ` (${watchersWithReviews.length})` : ''}</span>
+    </div>
+    <div class="reviews-section-content hidden">
+      ${reviewsHtml}
+      ${addReviewsHtml}
+    </div>
+  `;
+  
+  const header = container.querySelector('.reviews-section-header');
+  const content = container.querySelector('.reviews-section-content');
+  const toggleIcon = header.querySelector('.reviews-toggle-icon');
+  
+  const toggleReviews = () => {
+    const isExpanded = !content.classList.contains('hidden');
+    content.classList.toggle('hidden');
+    header.setAttribute('aria-expanded', String(!isExpanded));
+    toggleIcon.textContent = isExpanded ? '▶' : '▼';
+  };
+  
+  header.addEventListener('click', toggleReviews);
+  header.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleReviews(); }
+  });
+  
+  // Populate existing reviews
+  watchersWithReviews.forEach(w => {
+    const input = document.getElementById(`review-${w.id}`);
+    if (input) input.value = w.review;
+  });
+  
+  // Helper: add a watcher-name button to the "Add review for" section
+  function addReviewButton(watcherId, watcherName) {
+    let addSection = content.querySelector('.add-reviews-section');
+    if (!addSection) {
+      addSection = document.createElement('div');
+      addSection.className = 'add-reviews-section';
+      addSection.innerHTML = `<span class="add-reviews-label">Add review for:</span><div class="add-review-buttons"></div>`;
+      content.appendChild(addSection);
+    }
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'add-review-btn';
+    btn.dataset.watcherId = watcherId;
+    btn.textContent = watcherName;
+    addSection.querySelector('.add-review-buttons').appendChild(btn);
+    attachAddReviewHandler(btn);
+  }
+  
+  // Helper: create a review row and insert it before the "Add review" section
+  function createReviewRow(watcherId, watcherName, initialValue = '') {
+    const row = document.createElement('div');
+    row.className = 'watcher-review-row';
+    row.dataset.watcherId = watcherId;
+    row.innerHTML = `
+      <div class="watcher-review-header">
+        <span class="watcher-review-name">${escapeHtml(watcherName)}'s review</span>
+        <button type="button" class="remove-review-btn" data-watcher-id="${watcherId}" aria-label="Remove ${watcherName}'s review">&times;</button>
+      </div>
+      <textarea class="watcher-review-input" id="review-${watcherId}" data-watcher-id="${watcherId}" rows="3" maxlength="500" placeholder="Write ${escapeHtml(watcherName)}'s review..."></textarea>
+    `;
+    
+    const addSection = content.querySelector('.add-reviews-section');
+    if (addSection) {
+      addSection.insertAdjacentElement('beforebegin', row);
+    } else {
+      content.appendChild(row);
+    }
+    
+    if (initialValue) {
+      row.querySelector('textarea').value = initialValue;
+    }
+    
+    // Attach remove handler
+    row.querySelector('.remove-review-btn').addEventListener('click', () => {
+      if (!confirm(`Delete ${watcherName}'s review?`)) return;
+      row.remove();
+      // Update header count
+      const reviewCount = content.querySelectorAll('.watcher-review-row').length;
+      container.querySelector('.reviews-header-label').textContent =
+        `Watcher Reviews${reviewCount > 0 ? ` (${reviewCount})` : ''}`;
+      addReviewButton(watcherId, watcherName);
+    });
+    
+    return row;
+  }
+  
+  function attachAddReviewHandler(btn) {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const watcherId = btn.dataset.watcherId;
+      const watcher = getWatcherById(watcherId);
+      if (!watcher) return;
+      btn.remove();
+      
+      // Remove add-reviews-section if no more buttons
+      const addSection = content.querySelector('.add-reviews-section');
+      if (addSection && addSection.querySelectorAll('.add-review-btn').length === 0) {
+        addSection.remove();
+      }
+      
+      const row = createReviewRow(watcherId, watcher.firstName);
+      // Update header count
+      const reviewCount = content.querySelectorAll('.watcher-review-row').length;
+      container.querySelector('.reviews-header-label').textContent =
+        `Watcher Reviews${reviewCount > 0 ? ` (${reviewCount})` : ''}`;
+      row.querySelector('textarea').focus();
+    });
+  }
+  
+  // Attach handlers for pre-rendered remove buttons (existing reviews from DB)
+  container.querySelectorAll('.watcher-review-row .remove-review-btn').forEach(btn => {
+    const watcherId = btn.dataset.watcherId;
+    const watcher = getWatcherById(watcherId);
+    if (!watcher) return;
+    const row = btn.closest('.watcher-review-row');
+    btn.addEventListener('click', () => {
+      if (!confirm(`Delete ${watcher.firstName}'s review?`)) return;
+      row.remove();
+      const reviewCount = content.querySelectorAll('.watcher-review-row').length;
+      container.querySelector('.reviews-header-label').textContent =
+        `Watcher Reviews${reviewCount > 0 ? ` (${reviewCount})` : ''}`;
+      addReviewButton(watcherId, watcher.firstName);
+    });
+  });
+  
+  // Attach handlers for "Add review for" buttons
+  container.querySelectorAll('.add-review-btn').forEach(btn => attachAddReviewHandler(btn));
 }
 
 function generateStarRating(rating, watcherId) {
@@ -485,7 +703,7 @@ function hideSessionForm() {
   sessionWatcherDropdown = null;
 }
 
-function handleSessionSubmit(movie) {
+async function handleSessionSubmit(movie) {
   const form = document.getElementById('sessionForm');
   const formData = new FormData(form);
   
@@ -505,12 +723,16 @@ function handleSessionSubmit(movie) {
     }
   });
   
+  // Collect watcher reviews
+  const watcherReviews = getCurrentReviewsFromDOM();
+  
   const fields = {
     movieId: movie.id,
     watchedDate: watchedDate,
     watcherIds: sessionWatcherDropdown ? sessionWatcherDropdown.getSelectedIds() : [],
     notes: formData.get('notes') || '',
-    watcherRatings: watcherRatings
+    watcherRatings: watcherRatings,
+    watcherReviews: watcherReviews
   };
   
   const errors = validateSessionFields(fields);
@@ -524,12 +746,12 @@ function handleSessionSubmit(movie) {
     const existing = getSessionsByMovieId(movie.id).find(s => s.id === sessionId);
     if (existing) {
       const updated = updateSession(existing, fields);
-      updateSessionInStore(sessionId, updated);
+      await updateSessionInStore(sessionId, updated);
     }
   } else {
     // Create new session
     const session = createSession(fields);
-    addSession(session);
+    await addSession(session);
   }
   
   hideSessionForm();
@@ -579,6 +801,7 @@ function handleDeleteMovie(movie) {
 async function init() {
   await loadWatchers(); // Load watchers data
   await loadSessions(); // Load sessions data
+  await directorRepository.load(); // Load directors data
   const movieId = getMovieIdFromURL();
   
   if (!movieId) {

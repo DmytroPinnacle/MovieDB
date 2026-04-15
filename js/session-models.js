@@ -42,6 +42,7 @@ export function createSession(fields = {}) {
     watchedDate: watchedDate,
     notes: (fields.notes || '').trim(),
     watcherRatings: fields.watcherRatings || {}, // { watcherId: rating }
+    watcherReviews: fields.watcherReviews || {}, // { watcherId: review text }
     createdAt: now,
     updatedAt: now
   };
@@ -76,6 +77,7 @@ export function updateSession(existing, fields) {
     watchedDate: fields.watchedDate !== undefined ? fields.watchedDate : existing.watchedDate,
     notes: fields.notes !== undefined ? fields.notes.trim() : existing.notes,
     watcherRatings: fields.watcherRatings !== undefined ? fields.watcherRatings : existing.watcherRatings || {},
+    watcherReviews: fields.watcherReviews !== undefined ? fields.watcherReviews : existing.watcherReviews || {},
     updatedAt: Date.now()
   };
 }

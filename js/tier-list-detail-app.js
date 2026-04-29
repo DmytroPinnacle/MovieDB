@@ -1,4 +1,5 @@
 
+import { translateLayout } from './keyboard-layout.js';
 import { tierListRepository, watcherRepository, movieRepository, directorRepository } from './dal/index.js';
 import { getWatcherFullName } from './watcher-models.js';
 import { GenreDropdown } from './genre-dropdown.js';
@@ -499,9 +500,14 @@ function handleSearchInput(e) {
         return;
     }
     
-    const matches = movieRepository.getAll()
-        .filter(m => m.title.toLowerCase().includes(term))
-        .slice(0, 5); // Limit 5
+    const translated = translateLayout(term);
+    const all = movieRepository.getAll();
+    const primary = all.filter(m => m.title.toLowerCase().includes(term));
+    const primaryIds = new Set(primary.map(m => m.id));
+    const secondary = translated !== term
+        ? all.filter(m => !primaryIds.has(m.id) && m.title.toLowerCase().includes(translated))
+        : [];
+    const matches = [...primary, ...secondary].slice(0, 5); // Limit 5
     
     if (matches.length > 0) {
         autocompleteDropdown.innerHTML = '';

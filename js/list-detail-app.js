@@ -1,3 +1,4 @@
+import { translateLayout } from './keyboard-layout.js';
 import { getLists, addMovieToList, removeMovieFromList, loadLists } from './list-storage.js';
 import { getMovies, loadMovies } from './storage.js';
 import { loadSessions, getLatestSessionByMovieId, getSessionsByMovieId } from './session-storage.js';
@@ -201,10 +202,16 @@ function handleSearch(e, dropdown) {
     return;
   }
   
-  const matches = allMovies.filter(m => 
-    !currentList.movieIds.includes(m.id) && 
+  const translated = translateLayout(term);
+  const primary = allMovies.filter(m =>
+    !currentList.movieIds.includes(m.id) &&
     m.title.toLowerCase().includes(term)
   );
+  const primaryIds = new Set(primary.map(m => m.id));
+  const secondary = translated !== term
+    ? allMovies.filter(m => !currentList.movieIds.includes(m.id) && !primaryIds.has(m.id) && m.title.toLowerCase().includes(translated))
+    : [];
+  const matches = [...primary, ...secondary];
   
   if (matches.length === 0) {
       dropdown.classList.add('hidden');

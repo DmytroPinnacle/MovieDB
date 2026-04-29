@@ -1,3 +1,4 @@
+import { translateLayout } from './keyboard-layout.js';
 import { directorRepository } from './dal/index.js';
 import { createDirector } from './models.js';
 
@@ -68,10 +69,18 @@ export class DirectorDropdown {
   getDirectors() {
     // Use the pre-sorted list if available, otherwise fallback (shouldn't happen if logic is correct)
     let directors = this.viewDirectors.length > 0 ? this.viewDirectors : directorRepository.getAll();
-    
+
     if (this.searchTerm) {
         const term = this.searchTerm.toLowerCase();
-        directors = directors.filter(d => d.name.toLowerCase().includes(term));
+        const translated = translateLayout(term);
+        const primary = directors.filter(d => d.name.toLowerCase().includes(term));
+        if (translated !== term) {
+            const primaryIds = new Set(primary.map(d => d.id));
+            const secondary = directors.filter(d => !primaryIds.has(d.id) && d.name.toLowerCase().includes(translated));
+            directors = [...primary, ...secondary];
+        } else {
+            directors = primary;
+        }
     }
 
     return directors;

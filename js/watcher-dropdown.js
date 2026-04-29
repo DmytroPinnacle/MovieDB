@@ -1,4 +1,5 @@
 // Searchable dropdown component for watcher selection
+import { translateLayout } from './keyboard-layout.js';
 import { getWatchers, getWatchersSortedByFavorites, isFavorite } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
 
@@ -179,27 +180,38 @@ export class WatcherDropdown {
   filterWatchers(searchTerm) {
     const term = searchTerm.toLowerCase().trim();
     const list = this.container.querySelector('.watcher-dropdown-list');
-    const items = list.querySelectorAll('.watcher-dropdown-item');
-    
-    let visibleCount = 0;
+    const items = Array.from(list.querySelectorAll('.watcher-dropdown-item'));
+
+    const existingEmpty = list.querySelector('.watcher-dropdown-no-results');
+    if (existingEmpty) existingEmpty.remove();
+
+    if (term === '') {
+      items.forEach(item => { item.style.display = ''; });
+      return;
+    }
+
+    const translated = translateLayout(term);
+    const primary = [];
+    const secondary = [];
+
     items.forEach(item => {
-      const checkbox = item.querySelector('input[type="checkbox"]');
-      const watcherName = checkbox.dataset.watcherName;
-      
-      // Partial match: check if search term is anywhere in the name
-      if (term === '' || watcherName.includes(term)) {
-        item.style.display = '';
-        visibleCount++;
+      const watcherName = item.querySelector('input[type="checkbox"]').dataset.watcherName;
+      if (watcherName.includes(term)) {
+        primary.push(item);
+      } else if (translated !== term && watcherName.includes(translated)) {
+        secondary.push(item);
       } else {
         item.style.display = 'none';
       }
     });
-    
-    // Show "no results" message if needed
-    const existingEmpty = list.querySelector('.watcher-dropdown-no-results');
-    if (existingEmpty) existingEmpty.remove();
-    
-    if (visibleCount === 0 && term !== '') {
+
+    // show and reorder: primary first, then secondary
+    [...primary, ...secondary].forEach(item => {
+      item.style.display = '';
+      list.appendChild(item);
+    });
+
+    if (primary.length === 0 && secondary.length === 0) {
       const noResults = document.createElement('div');
       noResults.className = 'watcher-dropdown-no-results';
       noResults.textContent = `No watchers found matching "${searchTerm}"`;

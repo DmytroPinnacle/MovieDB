@@ -3,6 +3,7 @@
  * Main controller for the watchers management page
  */
 
+import { translateLayout } from './keyboard-layout.js';
 import { createWatcher, validateWatcherFields, updateWatcher, getWatcherFullName } from './watcher-models.js';
 import { loadWatchers, addWatcher, updateWatcherInStore, deleteWatcher, getWatchers, toggleFavorite, isFavorite, getFavorites, getWatchersSortedByFavorites } from './watcher-storage.js';
 
@@ -98,11 +99,12 @@ function handleSearch(e) {
 
 function filterWatchers(watchers) {
   if (!searchTerm) return watchers;
-  
-  return watchers.filter(watcher => {
-    const fullName = getWatcherFullName(watcher).toLowerCase();
-    return fullName.includes(searchTerm);
-  });
+  const translated = translateLayout(searchTerm);
+  const primary = watchers.filter(w => getWatcherFullName(w).toLowerCase().includes(searchTerm));
+  if (translated === searchTerm) return primary;
+  const primaryIds = new Set(primary.map(w => w.id));
+  const secondary = watchers.filter(w => !primaryIds.has(w.id) && getWatcherFullName(w).toLowerCase().includes(translated));
+  return [...primary, ...secondary];
 }
 
 // ===== RENDERING =====

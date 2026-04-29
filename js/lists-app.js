@@ -1,3 +1,4 @@
+import { translateLayout } from './keyboard-layout.js';
 import { getLists, addList, updateList, deleteList, loadLists } from './list-storage.js';
 import { getMovies, loadMovies } from './storage.js';
 import { getWatchers, loadWatchers } from './watcher-storage.js';
@@ -40,16 +41,21 @@ function renderLists() {
 
   // Filter based on viewState
   if (viewState.movieFilter && viewState.movieFilter.length >= 2) {
-      lists = lists.filter(list => {
-          if (!list.movieIds || list.movieIds.length === 0) return false;
-          
-          const term = viewState.movieFilter.toLowerCase();
-          // Check if any movie in the list matches
-          return list.movieIds.some(mid => {
+      const term = viewState.movieFilter.toLowerCase();
+      const translated = translateLayout(term);
+      const matchesTerm = (list, t) =>
+          list.movieIds && list.movieIds.some(mid => {
               const m = allMovies.find(mov => mov.id === mid);
-              return m && m.title.toLowerCase().includes(term);
+              return m && m.title.toLowerCase().includes(t);
           });
-      });
+      const primaryLists = lists.filter(list => matchesTerm(list, term));
+      if (translated !== term) {
+          const primaryIds = new Set(primaryLists.map(l => l.id));
+          const secondaryLists = lists.filter(l => !primaryIds.has(l.id) && matchesTerm(l, translated));
+          lists = [...primaryLists, ...secondaryLists];
+      } else {
+          lists = primaryLists;
+      }
   }
 
   // Filter by Genres (OR logic)

@@ -1,4 +1,5 @@
 // UI rendering + DOM helpers
+import { translateLayout } from './keyboard-layout.js';
 import { getMovies } from './storage.js';
 import { getWatchers, getWatcherById, isFavorite } from './watcher-storage.js';
 import { getWatcherFullName } from './watcher-models.js';
@@ -17,7 +18,6 @@ export function renderMovieList({ filterText='', genres=[], watchers=[], lists=[
 
   // filter
   const ft = filterText.trim().toLowerCase();
-  if (ft) movies = movies.filter(m => m.title.toLowerCase().includes(ft));
   if (genres.length > 0) {
     movies = movies.filter(m => {
       // Handle both old 'genre' string and new 'genres' array
@@ -69,6 +69,19 @@ export function renderMovieList({ filterText='', genres=[], watchers=[], lists=[
     if (av > bv) return dir === 'asc' ? 1 : -1;
     return 0;
   });
+
+  // text filter with keyboard-layout fallback: primary (direct match) before secondary (layout-converted match)
+  if (ft) {
+    const translated = translateLayout(ft);
+    const primary = movies.filter(m => m.title.toLowerCase().includes(ft));
+    if (translated !== ft) {
+      const primaryIds = new Set(primary.map(m => m.id));
+      const secondary = movies.filter(m => !primaryIds.has(m.id) && m.title.toLowerCase().includes(translated));
+      movies = [...primary, ...secondary];
+    } else {
+      movies = primary;
+    }
+  }
 
   listEl.innerHTML='';
   if (!movies.length) {

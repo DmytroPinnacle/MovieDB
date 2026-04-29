@@ -1,6 +1,8 @@
 // Searchable dropdown component for genre selection
 // Similar to watcher dropdown but for genres
 
+import { translateLayout } from './keyboard-layout.js';
+
 const AVAILABLE_GENRES = [
   'Action',
   'Adventure',
@@ -167,25 +169,38 @@ export class GenreDropdown {
   filterGenres(searchTerm) {
     const term = searchTerm.toLowerCase().trim();
     const list = this.container.querySelector('.watcher-dropdown-list');
-    const items = list.querySelectorAll('.watcher-dropdown-item');
-    
-    let visibleCount = 0;
+    const items = Array.from(list.querySelectorAll('.watcher-dropdown-item'));
+
+    const existingEmpty = list.querySelector('.watcher-dropdown-no-results');
+    if (existingEmpty) existingEmpty.remove();
+
+    if (term === '') {
+      items.forEach(item => { item.style.display = ''; });
+      return;
+    }
+
+    const translated = translateLayout(term);
+    const primary = [];
+    const secondary = [];
+
     items.forEach(item => {
-      const checkbox = item.querySelector('input[type="checkbox"]');
-      const genreName = checkbox.dataset.genreName;
-      
-      if (term === '' || genreName.includes(term)) {
-        item.style.display = '';
-        visibleCount++;
+      const genreName = item.querySelector('input[type="checkbox"]').dataset.genreName;
+      if (genreName.includes(term)) {
+        primary.push(item);
+      } else if (translated !== term && genreName.includes(translated)) {
+        secondary.push(item);
       } else {
         item.style.display = 'none';
       }
     });
-    
-    const existingEmpty = list.querySelector('.watcher-dropdown-no-results');
-    if (existingEmpty) existingEmpty.remove();
-    
-    if (visibleCount === 0 && term !== '') {
+
+    // show and reorder: primary first, then secondary
+    [...primary, ...secondary].forEach(item => {
+      item.style.display = '';
+      list.appendChild(item);
+    });
+
+    if (primary.length === 0 && secondary.length === 0) {
       const noResults = document.createElement('div');
       noResults.className = 'watcher-dropdown-no-results';
       noResults.textContent = `No genres found matching "${searchTerm}"`;

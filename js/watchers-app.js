@@ -225,9 +225,15 @@ async function confirmDelete(id) {
   }
 }
 
-function handleToggleFavorite(e, id) {
+async function handleToggleFavorite(e, id) {
   e.stopPropagation(); // Prevent row click or other events
-  const isNowFav = toggleFavorite(id);
+  try {
+    await toggleFavorite(id);
+  } catch (err) {
+    console.error('Failed to persist favorite watcher:', err);
+    alert('Failed to save favorite watcher. Please try again.');
+    return;
+  }
   
   // Re-render to update sorting
   renderWatchers();

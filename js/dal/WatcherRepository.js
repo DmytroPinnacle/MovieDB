@@ -1,5 +1,7 @@
 import { BaseRepository } from './BaseRepository.js';
 
+const API_URL = 'http://localhost:3000/api';
+
 /**
  * Watcher Repository
  * Handles CRUD operations for watchers with favorites support
@@ -7,36 +9,57 @@ import { BaseRepository } from './BaseRepository.js';
 class WatcherRepository extends BaseRepository {
   constructor() {
     super('Watcher');
-    this._favoritesKey = 'moviedb.watcher.favorites.v2';
+    this._favoritesResource = 'watcherfavorites';
+    this._favoritesRecordId = 'global';
     this._favorites = []; // Array of watcher IDs in order of selection
-    this._loadFavoritesFromStorage();
   }
 
-  /**
-   * Load favorites from sessionStorage
-   * @private
-   */
-  _loadFavoritesFromStorage() {
+  async load() {
+    const watchers = await super.load();
+    await this._loadFavoritesFromApi();
+    return watchers;
+  }
+
+  async _loadFavoritesFromApi() {
     try {
-      const raw = sessionStorage.getItem(this._favoritesKey);
-      if (raw) {
-        this._favorites = JSON.parse(raw);
+      const response = await fetch(`${API_URL}/${this._favoritesResource}/${this._favoritesRecordId}`);
+
+      if (response.ok) {
+        const record = await response.json();
+        this._favorites = Array.isArray(record.favorites) ? record.favorites : [];
+        return;
       }
+
+      if (response.status !== 404) {
+        throw new Error(`Favorites API returned ${response.status}`);
+      }
+
+      this._favorites = [];
     } catch (err) {
-      console.warn('Failed to load favorites from sessionStorage:', err);
+      console.warn('Failed to load favorites from API:', err);
       this._favorites = [];
     }
   }
 
-  /**
-   * Save favorites to sessionStorage
-   * @private
-   */
-  _saveFavoritesToStorage() {
+  async _saveFavoritesToApi() {
+    const payload = {
+      id: this._favoritesRecordId,
+      favorites: this._favorites.slice(),
+      updatedAt: Date.now()
+    };
+
     try {
-      sessionStorage.setItem(this._favoritesKey, JSON.stringify(this._favorites));
+      const response = await fetch(`${API_URL}/${this._favoritesResource}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        throw new Error(`Favorites API returned ${response.status}`);
+      }
     } catch (err) {
-      console.error('Failed to save favorites to sessionStorage:', err);
+      console.warn('Failed to save favorites to API:', err);
+      throw err;
     }
   }
 
@@ -112,14 +135,20 @@ class WatcherRepository extends BaseRepository {
    * @param {string} watcherId - Watcher ID
    * @returns {boolean} New favorite status
    */
-  toggleFavorite(watcherId) {
+  async toggleFavorite(watcherId) {
+    const previousFavorites = this._favorites.slice();
     const index = this._favorites.indexOf(watcherId);
     if (index > -1) {
       this._favorites.splice(index, 1);
     } else {
       this._favorites.push(watcherId);
     }
-    this._saveFavoritesToStorage();
+    try {
+      await this._saveFavoritesToApi();
+    } catch (err) {
+      this._favorites = previousFavorites;
+      throw err;
+    }
     return this._favorites.includes(watcherId);
   }
 
@@ -127,9 +156,9 @@ class WatcherRepository extends BaseRepository {
    * Set favorites from array
    * @param {Array} favoriteIds - Array of watcher IDs
    */
-  setFavorites(favoriteIds) {
+  async setFavorites(favoriteIds) {
     this._favorites = Array.isArray(favoriteIds) ? [...favoriteIds] : [];
-    this._saveFavoritesToStorage();
+    await this._saveFavoritesToApi();
   }
 
   /**
@@ -138,7 +167,6 @@ class WatcherRepository extends BaseRepository {
   clear() {
     super.clear();
     this._favorites = [];
-    this._saveFavoritesToStorage();
   }
 
   /**
@@ -161,12 +189,10 @@ class WatcherRepository extends BaseRepository {
       // Legacy: just an array of watchers
       super.loadData(data);
       this._favorites = [];
-      this._saveFavoritesToStorage();
     } else if (data && typeof data === 'object') {
       // New format: object with watchers and favorites
       super.loadData(data.watchers || []);
       this._favorites = Array.isArray(data.favorites) ? [...data.favorites] : [];
-      this._saveFavoritesToStorage();
     }
   }
 }

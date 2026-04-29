@@ -4,7 +4,8 @@
   "description": "Simple SQLite backend for MovieDB",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "migrate": "node migrate.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",

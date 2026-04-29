@@ -209,6 +209,14 @@ function wireEvents() {
   // Auto-fill from OMDb when IMDB ID is entered
   const imdbInput = qs('#imdbId');
   if (imdbInput) {
+    imdbInput.addEventListener('keydown', (e) => {
+      // Prevent accidental form submit when pressing Enter in IMDB field.
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        imdbInput.blur();
+      }
+    });
+
     imdbInput.addEventListener('blur', async () => {
       const imdbId = imdbInput.value.trim();
       if (!imdbId || !/^tt\d{7,8}$/.test(imdbId)) return;
